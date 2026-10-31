@@ -130,7 +130,7 @@
   .music-title {
     font-size: 12px; letter-spacing: 0.05em; color: var(--text);
     max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    font-family: sans-serif;
+    font-family: sans-serif; transition: color 0.3s;
   }
   .music-player.playing .music-title { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.3); }
   
@@ -138,14 +138,71 @@
     .music-title { max-width: 130px; font-size: 11px; }
   }
 
-  /* ============ 游戏画面（占位） ============ */
-  #screen-game{justify-content:flex-start; padding:0;}
-  .game-wrap{width:100%; max-width:720px; height:100%; padding:20px 22px; display:flex; flex-direction:column; gap:22px;}
-  .game-head{display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:14px; border-bottom:1px solid var(--line);}
-  .chapter{font-size:13px; letter-spacing:.22em; color:var(--gold); opacity:.8;}
-  .game-body{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center;}
-  .placeholder{font-size:16px; letter-spacing:.08em; margin:0;}
-  .placeholder.dim{font-size:13px; color:var(--dim);}
+  /* ============ 游戏画面（带新背景） ============ */
+  #screen-game{
+    justify-content:flex-start; padding:0;
+    /* 【已修改】这里的后缀名改成了 bg1.jpeg */
+    background: url('bg1.jpeg') center/cover no-repeat;
+    position: fixed; inset: 0;
+  }
+  #screen-game::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: rgba(6, 7, 11, 0.75);
+    z-index: 0;
+  }
+
+  .game-wrap{
+    width:100%; max-width:720px; height:100%; 
+    padding:20px 22px; display:flex; flex-direction:column; gap:22px;
+    position: relative; z-index: 1;
+  }
+  
+  .game-head{
+    display:flex; justify-content:space-between; align-items:center; 
+    gap:12px; padding-bottom:14px; border-bottom:1px solid var(--line);
+  }
+  
+  .game-body{
+    flex:1; display:flex; flex-direction:column; 
+    align-items:flex-start; justify-content:flex-start; 
+    padding-top:20px; text-align:left;
+    overflow-y: auto;
+  }
+  .game-body::-webkit-scrollbar{width:6px;}
+  .game-body::-webkit-scrollbar-thumb{background:#2a3244; border-radius:3px;}
+
+  #story-text {
+    font-size: 16.5px;
+    line-height: 2;
+    letter-spacing: .05em;
+    color: var(--text);
+    white-space: pre-wrap; 
+    margin-bottom: 30px;
+    min-height: 120px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  }
+  
+  #story-choices {
+    display: flex; flex-direction: column; gap: 12px;
+    width: 100%;
+  }
+  .story-btn {
+    width: 100%; padding: 14px 18px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text);
+    font: inherit; font-size: 15px; text-align: left;
+    cursor: pointer; transition: .2s;
+    backdrop-filter: blur(4px);
+  }
+  .story-btn:hover {
+    background: rgba(217,164,65,.15);
+    border-color: rgba(217,164,65,.5);
+    transform: translateX(4px);
+    color: #fff;
+  }
 
   /* ============ 通用按钮 ============ */
   .ghost-btn{padding:8px 14px; background:transparent; border:1px solid var(--line); border-radius:6px; color:var(--dim); font:inherit; font-size:13px; letter-spacing:.1em; cursor:pointer; transition:.2s;}
@@ -181,7 +238,6 @@
   textarea:focus{border-color:rgba(217,164,65,.5);}
   textarea::placeholder{color:rgba(111,120,137,.7);}
 
-  /* CG 画廊 */
   .cg-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;}
   .cg-item{position:relative; aspect-ratio:16/10; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; border-radius:8px; border:1px solid var(--line); background:rgba(255,255,255,.02); font-size:11px; letter-spacing:.1em; color:var(--dim); overflow:hidden; transition:.25s;}
   .cg-item .lock{font-size:15px; opacity:.5;}
@@ -195,7 +251,6 @@
     .game-title{letter-spacing:.06em; text-indent:.06em;}
   }
 
-  /* 告别画面 */
   .farewell{position:fixed; inset:0; z-index:100; display:none; flex-direction:column; align-items:center; justify-content:center; gap:16px; text-align:center; background:#04050a;}
   .farewell.show{display:flex; animation:fade 1s ease both;}
   .farewell p{margin:0; letter-spacing:.3em; text-indent:.3em;}
@@ -206,12 +261,12 @@
 <body>
 
 <!-- ==================== 音乐播放器 ==================== -->
-<!-- 修改了这里的 src，指向你的 bgm1.mp3 -->
-<audio id="bgm" src="bgm1.mp3" loop></audio>
+<audio id="bgm1" src="bgm1.mp3" loop></audio>
+<audio id="bgm2" src="bgm2.mp3" loop></audio>
+
 <div id="music-player" class="music-player" title="点击播放/暂停">
   <div class="music-btn" id="music-icon">▶</div>
-  <!-- 页面显示的歌曲名，你可以随意改这里的文字，不影响音乐加载 -->
-  <div class="music-title">莘逼晨晨Book ~ We＆炸炸炸猪</div>
+  <div class="music-title" id="music-title">莘逼晨晨Book</div>
 </div>
 
 <!-- ==================== 标题画面 ==================== -->
@@ -237,17 +292,17 @@
   <footer class="foot">v0.1</footer>
 </main>
 
-<!-- ==================== 游戏画面（占位） ==================== -->
+<!-- ==================== 游戏画面 ==================== -->
 <section id="screen-game" class="screen">
   <div class="game-wrap">
     <header class="game-head">
       <button class="ghost-btn" id="btn-back">← 返回标题</button>
-      <span class="chapter">序 章</span>
       <button class="ghost-btn" id="btn-save-game">存档</button>
     </header>
+    
     <div class="game-body">
-      <p class="placeholder">剧情引擎施工中……</p>
-      <p class="placeholder dim" id="game-status">下一步将接入文字显示与选项分支。</p>
+      <div id="story-text"></div>
+      <div id="story-choices"></div>
     </div>
   </div>
 </section>
@@ -298,30 +353,45 @@
 
 <script>
 /* =========================================================
-   1. 音乐播放逻辑
+   1. 音乐播放控制逻辑
    ========================================================= */
-const bgm = document.getElementById('bgm');
+const bgm1 = document.getElementById('bgm1');
+const bgm2 = document.getElementById('bgm2');
 const musicPlayer = document.getElementById('music-player');
 const musicIcon = document.getElementById('music-icon');
+const musicTitle = document.getElementById('music-title');
 
-function toggleMusic() {
-  if (bgm.paused) {
-    bgm.play().catch(e => console.log("浏览器拦截了自动播放，需要用户点击触发。"));
-  } else {
-    bgm.pause();
+let activeBgm = bgm1; 
+
+function switchMusic(newAudio, newTitle) {
+  if (activeBgm !== newAudio) {
+    activeBgm.pause();
+    activeBgm.currentTime = 0; 
+    activeBgm = newAudio;
   }
+  musicTitle.textContent = newTitle;
+  activeBgm.play().catch(e => console.log("需要用户交互才能播放"));
 }
 
-musicPlayer.addEventListener('click', toggleMusic);
-
-bgm.addEventListener('play', () => {
-  musicPlayer.classList.add('playing');
-  musicIcon.textContent = '💿'; 
+[bgm1, bgm2].forEach(audio => {
+  audio.addEventListener('play', () => {
+    musicPlayer.classList.add('playing');
+    musicIcon.textContent = '💿'; 
+  });
+  audio.addEventListener('pause', () => {
+    if (bgm1.paused && bgm2.paused) {
+      musicPlayer.classList.remove('playing');
+      musicIcon.textContent = '▶'; 
+    }
+  });
 });
 
-bgm.addEventListener('pause', () => {
-  musicPlayer.classList.remove('playing');
-  musicIcon.textContent = '▶'; 
+musicPlayer.addEventListener('click', () => {
+  if (activeBgm.paused) {
+    activeBgm.play().catch(e => console.log(e));
+  } else {
+    activeBgm.pause();
+  }
 });
 
 
@@ -359,7 +429,7 @@ let startTime = null;
 function animateBg(timestamp) {
   if (!startTime) startTime = timestamp;
   const elapsed = timestamp - startTime;
-  const period = 24000; // 24秒一圈
+  const period = 60000; 
   const angle = (elapsed / period) * Math.PI * 2;
   const offset = - (Math.sin(angle) + 1) / 2 * maxOffset;
   bgImage.style.transform = `translateY(-50%) translateX(${offset}px)`;
@@ -369,7 +439,7 @@ requestAnimationFrame(animateBg);
 
 
 /* =========================================================
-   3. UI 逻辑
+   3. UI 与 打字机逻辑
    ========================================================= */
 const CG_LIST = [];
 function newProgress(){ return { v: 1, scene: "start" }; }
@@ -383,7 +453,9 @@ const saveInput  = $("#save-input");
 const saveOut    = $("#save-out");
 const saveErr    = $("#save-err");
 const genHint    = $("#gen-hint");
-const gameStatus = $("#game-status");
+
+const storyText = $("#story-text");
+const storyChoices = $("#story-choices");
 
 function encodeSave(obj){
   const json = JSON.stringify(obj);
@@ -457,24 +529,57 @@ $("#btn-load").addEventListener("click", () => {
   }
   progress = data;
   closeModal();
-  enterGame("已读取存档 · 剧情节点：" + data.scene);
+  enterGame();
 });
 
-function enterGame(statusText){
-  showScreen("game");
-  gameStatus.textContent = statusText || "下一步将接入文字显示与选项分支。";
+/* =========================================================
+   4. 核心玩法：打字机效果与场景切换
+   ========================================================= */
+let typingTimer = null;
+
+function typeWriter(text, element, callback) {
+  clearInterval(typingTimer);
+  element.innerHTML = "";
   
-  if (bgm.paused) {
-    bgm.play().catch(() => { /* 如果浏览器拦截，就等用户点右上角 */ });
-  }
+  let i = 0;
+  typingTimer = setInterval(() => {
+    if (i < text.length) {
+      if (text.charAt(i) === '\n') {
+        element.innerHTML += '<br>';
+      } else {
+        element.innerHTML += text.charAt(i);
+      }
+      i++;
+    } else {
+      clearInterval(typingTimer);
+      if (callback) callback();
+    }
+  }, 60); 
 }
 
+function enterGame() {
+  showScreen("game");
+  
+  switchMusic(bgm2, "KeraiWalk");
+
+  storyChoices.innerHTML = "";
+  const introText = "哦吼吼，逼然不美吗？你无法认识到它的美~让我给你介绍吧！\n\n末世来临，选择你的酒店。";
+  
+  typeWriter(introText, storyText, () => {
+    // 等你想好了选项代码，我们加在这里
+  });
+}
+
+
+/* =========================================================
+   5. 菜单与按钮事件绑定
+   ========================================================= */
 $$(".menu-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     const action = btn.dataset.action;
     if (action === "start"){
       progress = newProgress();
-      enterGame("新游戏 · 剧情节点：" + progress.scene);
+      enterGame();
     }
     if (action === "save"){
       saveInput.value = ""; saveErr.textContent = "";
@@ -487,7 +592,12 @@ $$(".menu-btn").forEach(btn => {
   });
 });
 
-$("#btn-back").addEventListener("click", () => { showScreen("title"); });
+$("#btn-back").addEventListener("click", () => { 
+  clearInterval(typingTimer); 
+  showScreen("title");
+  switchMusic(bgm1, "莘逼晨晨Book ~ We＆炸炸炸猪");
+});
+
 $("#btn-save-game").addEventListener("click", () => {
   openModal("modal-save"); $("[data-tab='tab-gen']").click();
 });
@@ -499,17 +609,6 @@ function renderCG(){
     empty.className = "hint cg-empty"; empty.textContent = "还没有任何 CG。";
     grid.appendChild(empty); return;
   }
-  CG_LIST.forEach(cg => {
-    const item = document.createElement("div");
-    item.className = "cg-item " + (cg.unlocked ? "unlocked" : "locked");
-    if (cg.unlocked){
-      item.innerHTML = `<span>${cg.name}</span>`;
-      if (cg.src) item.style.backgroundImage = `url(${cg.src})`;
-    } else {
-      item.innerHTML = `<span class="lock">🔒</span><span>？ ？ ？</span>`;
-    }
-    grid.appendChild(item);
-  });
 }
 
 $("#btn-confirm-quit").addEventListener("click", () => {
@@ -517,7 +616,10 @@ $("#btn-confirm-quit").addEventListener("click", () => {
 });
 $("#btn-farewell-back").addEventListener("click", () => {
   $("#farewell").classList.remove("show"); showScreen("title");
+  switchMusic(bgm1, "莘逼晨晨Book ~ We＆炸炸炸猪");
 });
+
+musicTitle.textContent = "莘逼晨晨Book ~ We＆炸炸炸猪";
 
 renderCG();
 </script>
