@@ -98,18 +98,13 @@
 
   /* ============ 音乐播放器 UI ============ */
   .music-player {
-    position: fixed;
-    top: 20px; right: 20px;
-    z-index: 100;
+    position: fixed; top: 20px; right: 20px; z-index: 100;
     display: flex; align-items: center; gap: 10px;
     padding: 6px 16px 6px 6px;
-    background: rgba(6, 7, 11, 0.65);
-    border: 1px solid var(--line);
-    border-radius: 40px;
-    backdrop-filter: blur(10px);
+    background: rgba(6, 7, 11, 0.65); border: 1px solid var(--line);
+    border-radius: 40px; backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     cursor: pointer;
   }
   .music-player:hover { border-color: rgba(217,164,65,0.4); background: rgba(6, 7, 11, 0.85); }
@@ -143,12 +138,12 @@
     justify-content:flex-start; padding:0;
     background: url('bg1.jpeg') center/cover no-repeat;
     position: fixed; inset: 0;
+    transition: filter 1.5s ease; /* 新增：用于黑化过渡 */
   }
   #screen-game::before {
-    content: "";
-    position: absolute; inset: 0;
-    background: rgba(6, 7, 11, 0.75);
-    z-index: 0;
+    content: ""; position: absolute; inset: 0;
+    background: rgba(6, 7, 11, 0.75); z-index: 0;
+    transition: background 1.5s ease;
   }
 
   .game-wrap{
@@ -165,43 +160,62 @@
   .game-body{
     flex:1; display:flex; flex-direction:column; 
     align-items:flex-start; justify-content:flex-start; 
-    padding-top:20px; text-align:left;
-    overflow-y: auto;
+    padding-top:20px; text-align:left; overflow-y: auto;
   }
   .game-body::-webkit-scrollbar{width:6px;}
   .game-body::-webkit-scrollbar-thumb{background:#2a3244; border-radius:3px;}
 
   #story-text {
-    font-size: 16.5px;
-    line-height: 2;
-    letter-spacing: .05em;
-    color: var(--text);
-    white-space: pre-wrap; 
-    margin-bottom: 30px;
-    min-height: 120px;
+    font-size: 16.5px; line-height: 2; letter-spacing: .05em;
+    color: var(--text); white-space: pre-wrap; 
+    margin-bottom: 30px; min-height: 120px;
     text-shadow: 0 2px 4px rgba(0,0,0,0.8);
   }
   
   #story-choices {
     display: flex; flex-direction: column; gap: 12px;
-    width: 100%;
+    width: 100%; margin-bottom: 20px;
   }
   .story-btn {
     width: 100%; padding: 14px 18px;
-    background: rgba(255,255,255,.05);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    color: var(--text);
+    background: rgba(255,255,255,.05); border: 1px solid var(--line);
+    border-radius: 8px; color: var(--text);
     font: inherit; font-size: 15px; text-align: left;
-    cursor: pointer; transition: .2s;
-    backdrop-filter: blur(4px);
+    cursor: pointer; transition: .2s; backdrop-filter: blur(4px);
   }
   .story-btn:hover {
-    background: rgba(217,164,65,.15);
-    border-color: rgba(217,164,65,.5);
-    transform: translateX(4px);
-    color: #fff;
+    background: rgba(217,164,65,.15); border-color: rgba(217,164,65,.5);
+    transform: translateX(4px); color: #fff;
   }
+
+  /* ============ 全屏黑幕与结局弹窗 ============ */
+  .screen-dark {
+    position: fixed; inset: 0; z-index: 80;
+    background: #000; opacity: 0; pointer-events: none;
+    transition: opacity 2s ease;
+  }
+  .screen-dark.active { opacity: 1; pointer-events: auto; }
+
+  .ending-modal {
+    position: fixed; inset: 0; z-index: 90;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.5s ease;
+    padding: 20px;
+  }
+  .ending-modal.active { opacity: 1; pointer-events: auto; }
+  
+  .ending-box {
+    background: linear-gradient(180deg, #121724 0%, #0c1019 100%);
+    border: 1px solid #d9736b; border-radius: 14px;
+    padding: 30px 40px; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.9);
+    max-width: 500px; width: 100%;
+  }
+  .ending-box h2 { color: #d9736b; margin-top: 0; font-size: 20px; letter-spacing: 2px; }
+  .ending-box p { color: var(--text); line-height: 2; margin: 15px 0; font-size: 15px;}
+  .ending-box .gold-text { color: var(--gold); font-weight: bold; }
 
   /* ============ 通用按钮 ============ */
   .ghost-btn{padding:8px 14px; background:transparent; border:1px solid var(--line); border-radius:6px; color:var(--dim); font:inherit; font-size:13px; letter-spacing:.1em; cursor:pointer; transition:.2s;}
@@ -250,14 +264,9 @@
   .achieve-item .lock{font-size:18px; opacity:.5;}
   .achieve-item.locked:hover{border-color:rgba(255,255,255,.16);}
   
-  /* 解锁后的成就样式（背景图+文字遮罩） */
-  .achieve-item.unlocked{
-    border-color:rgba(217,164,65,.4);
-    cursor:default;
-  }
+  .achieve-item.unlocked{ border-color:rgba(217,164,65,.4); cursor:default; }
   .achieve-item.unlocked .achieve-bg {
-    position:absolute; inset:0; 
-    background-size:cover; background-position:center;
+    position:absolute; inset:0; background-size:cover; background-position:center;
     opacity:0.6; transition:0.3s;
   }
   .achieve-item.unlocked:hover .achieve-bg { opacity:0.8; }
@@ -308,6 +317,17 @@
   <div class="music-title" id="music-title">莘逼晨晨Book</div>
 </div>
 
+<!-- ==================== 全屏黑幕与结局弹窗 ==================== -->
+<div id="dark-screen" class="screen-dark"></div>
+<div id="ending-modal" class="ending-modal">
+  <div class="ending-box">
+    <h2>💀 你晕死了过去！</h2>
+    <p>解锁Bad Ending1：<span class="gold-text">您是有多福大命大？？</span></p>
+    <p style="font-size:13px; color:#889;">快去成就页面看看解锁的结局吧。</p>
+    <button class="primary-btn" style="margin-top:15px;" onclick="location.reload()">重新开始</button>
+  </div>
+</div>
+
 <!-- ==================== 成就解锁提示 Toast ==================== -->
 <div id="toast" class="toast">
   <span>🏆</span> <span id="toast-text">解锁成就！</span>
@@ -329,7 +349,6 @@
     <nav class="menu">
       <button class="menu-btn" data-action="start">开始游戏</button>
       <button class="menu-btn" data-action="save">读取存档</button>
-      <!-- 这里改成了成就 -->
       <button class="menu-btn" data-action="achieve">成 就</button>
       <button class="menu-btn" data-action="quit">退出游戏</button>
     </nav>
@@ -489,14 +508,10 @@ requestAnimationFrame(animateBg);
 /* =========================================================
    3. 成就系统与 UI 逻辑
    ========================================================= */
-// 定义成就列表
+// 加入第二个成就
 let ACHIEVEMENTS = [
-  { 
-    id: "ach1", 
-    name: "欢迎光临莘莘之家！", 
-    unlocked: false, 
-    src: "bg.jpg" // 使用 bg.jpg 作为缩略图
-  }
+  { id: "ach1", name: "欢迎光临莘莘之家！", unlocked: false, src: "bg.jpg" },
+  { id: "ach2", name: "Bad Ending1：您是有多福大命大？？", unlocked: false, src: "bg1.jpeg" }
 ];
 
 function newProgress(){ return { v: 1, scene: "start" }; }
@@ -535,7 +550,6 @@ function unlockAchievement(id) {
   if (ach && !ach.unlocked) {
     ach.unlocked = true;
     showToast(`解锁成就：${ach.name}`);
-    // 如果成就界面开着，实时刷新
     if ($("#modal-achieve").classList.contains("active")) {
       renderAchievements();
     }
@@ -644,7 +658,7 @@ $("#btn-load").addEventListener("click", () => {
 
 
 /* =========================================================
-   5. 核心玩法：打字机与进入游戏
+   5. 核心玩法：打字机、场景与分支
    ========================================================= */
 let typingTimer = null;
 
@@ -671,16 +685,98 @@ function typeWriter(text, element, callback) {
 function enterGame() {
   showScreen("game");
   
+  // 重置所有状态（防止重新开始时遗留黑屏）
+  document.getElementById("dark-screen").classList.remove("active");
+  document.getElementById("ending-modal").classList.remove("active");
+  document.getElementById("screen-game").style.filter = "none";
+
   switchMusic(bgm2, "KeraiWalk");
 
   storyChoices.innerHTML = "";
   const introText = "哦吼吼，逼然不美吗？你无法认识到它的美~让我给你介绍吧！\n\n末世来临，选择你的酒店。";
   
-  // 【重点】进入游戏时，触发第一个成就
   unlockAchievement("ach1");
 
   typeWriter(introText, storyText, () => {
-    // 等你想好了选项代码，我们加在这里
+    renderChoices(); // 开场白敲完后，显示选项
+  });
+}
+
+// 渲染选项
+function renderChoices() {
+  storyChoices.innerHTML = "";
+  
+  const choices = [
+    { text: "选项1：呆在原地不动", action: chooseStay },
+    { text: "选项2：前往餐厅寻求庇护", action: chooseRestaurant },
+    { text: "选项3：前往酒店安置自我", action: chooseHotel }
+  ];
+
+  choices.forEach(c => {
+    const btn = document.createElement("button");
+    btn.className = "story-btn";
+    btn.textContent = c.text;
+    btn.onclick = () => {
+      storyChoices.innerHTML = ""; // 点击后隐藏选项，防止连点
+      c.action();
+    };
+    storyChoices.appendChild(btn);
+  });
+}
+
+// 选项1的逻辑
+function chooseStay() {
+  // 75% 概率触发坏结局 (Math.random() 生成 0~1 之间的小数)
+  if (Math.random() < 0.75) {
+    triggerBadEnd1();
+  } else {
+    // 25% 无事发生
+    typeWriter("接下来该怎么做？", storyText, () => {
+      renderChoices(); // 循环显示刚才的三个选项
+    });
+  }
+}
+
+// 触发坏结局1
+function triggerBadEnd1() {
+  // 1. 屏幕缓慢变暗
+  document.getElementById("dark-screen").classList.add("active");
+  document.getElementById("screen-game").style.filter = "brightness(0)";
+  
+  // 2. 解锁成就
+  unlockAchievement("ach2");
+  
+  // 3. 黑屏后弹出提示
+  setTimeout(() => {
+    document.getElementById("ending-modal").classList.add("active");
+  }, 2000); // 等变暗动画结束再弹
+}
+
+// 选项2和3：暂时占位
+function chooseRestaurant() {
+  typeWriter("你走向了餐厅寻求庇护……\n\n（餐厅剧情待开发中，敬请期待！）", storyText, () => {
+    // 返回一个按钮让你重选
+    const btn = document.createElement("button");
+    btn.className = "story-btn";
+    btn.textContent = "重新选择";
+    btn.onclick = () => {
+      storyText.innerHTML = "末世来临，选择你的酒店。";
+      renderChoices();
+    };
+    storyChoices.appendChild(btn);
+  });
+}
+
+function chooseHotel() {
+  typeWriter("你前往酒店安置自我……\n\n（酒店剧情待开发中，敬请期待！）", storyText, () => {
+    const btn = document.createElement("button");
+    btn.className = "story-btn";
+    btn.textContent = "重新选择";
+    btn.onclick = () => {
+      storyText.innerHTML = "末世来临，选择你的酒店。";
+      renderChoices();
+    };
+    storyChoices.appendChild(btn);
   });
 }
 
@@ -729,7 +825,7 @@ $("#btn-farewell-back").addEventListener("click", () => {
 
 musicTitle.textContent = "莘逼晨晨Book ~ We＆炸炸炸猪";
 
-// 初始化时渲染一次成就，防止点开空白
+// 初始化渲染
 renderAchievements();
 </script>
 </body>
