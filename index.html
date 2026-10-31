@@ -534,37 +534,18 @@ const MUSIC_LIST = [
   { id: "bgm3", name: "迷你世界里摘录的音乐", audio: bgm3 }
 ];
 
-// 终极保险：哪怕浏览器阻止本地存储，内存里绝对要有标题曲
-let unlockedMusic = ["bgm1"]; 
-
-function loadMusicFromStorage() {
+// 【核心修复 1】直接暴力读取本地存储，不用任何花里胡哨的 try-catch
+let unlockedMusic = ["bgm1"];
+let savedMusic = localStorage.getItem("xbcb_music");
+if (savedMusic) {
   try {
-    const saved = localStorage.getItem("xbcb_music");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) {
-        parsed.forEach(id => {
-          if (!unlockedMusic.includes(id)) unlockedMusic.push(id);
-        });
-      }
+    let parsed = JSON.parse(savedMusic);
+    if (Array.isArray(parsed)) {
+      parsed.forEach(id => {
+        if (!unlockedMusic.includes(id)) unlockedMusic.push(id);
+      });
     }
-  } catch(e) {
-    console.warn("浏览器安全限制拦截了本地存储，数据刷新后会丢失。请使用存档码备份。");
-  }
-  saveMusicToStorage();
-}
-
-function saveMusicToStorage() { 
-  try {
-    localStorage.setItem("xbcb_music", JSON.stringify(unlockedMusic)); 
   } catch(e) {}
-}
-
-function unlockMusic(id) {
-  if (!unlockedMusic.includes(id)) {
-    unlockedMusic.push(id);
-    saveMusicToStorage();
-  }
 }
 
 // 初始化音量
@@ -618,6 +599,14 @@ volumeBtn.addEventListener('click', (e) => {
   sfxAch.volume = currentVolume;
   updateVolumeIcon();
 });
+
+// 【核心修复 2】解锁并立即保存
+function unlockMusic(id) {
+  if (!unlockedMusic.includes(id)) {
+    unlockedMusic.push(id);
+    localStorage.setItem("xbcb_music", JSON.stringify(unlockedMusic));
+  }
+}
 
 function switchMusic(newAudio, newTitle, musicId) {
   if (activeBgm !== newAudio) {
@@ -714,24 +703,16 @@ let progress = {
   hitCount: 0 
 };
 
-function loadAchievementsFromStorage() {
+// 【核心修复 3】暴力读取并赋值成就
+let savedAch = localStorage.getItem("xbcb_achievements");
+if (savedAch) {
   try {
-    const saved = localStorage.getItem("xbcb_achievements");
-    if (saved) {
-      const parsed = JSON.parse(saved);
+    let parsed = JSON.parse(savedAch);
+    if (Array.isArray(parsed)) {
       ACHIEVEMENTS.forEach(ach => {
         if (parsed.includes(ach.id)) ach.unlocked = true;
       });
     }
-  } catch(e) {
-    console.warn("成就存储读取失败。");
-  }
-}
-
-function saveAchievements() {
-  try {
-    const unlockedIds = ACHIEVEMENTS.filter(a => a.unlocked).map(a => a.id);
-    localStorage.setItem("xbcb_achievements", JSON.stringify(unlockedIds));
   } catch(e) {}
 }
 
@@ -741,7 +722,10 @@ function unlockAchievement(id) {
     ach.unlocked = true;
     if (!progress.achievements.includes(id)) progress.achievements.push(id);
     
-    saveAchievements();
+    // 【核心修复 4】实时保存，绝不拖泥带水
+    const unlockedIds = ACHIEVEMENTS.filter(a => a.unlocked).map(a => a.id);
+    localStorage.setItem("xbcb_achievements", JSON.stringify(unlockedIds));
+    
     playSfx(sfxAch);
     
     showToast(`解锁成就：${ach.name}`);
@@ -768,6 +752,9 @@ function renderAchievements() {
 }
 
 function renderMusicRoom() {
+  // 双重保险：绝对确保 bgm1 在
+  if (!unlockedMusic.includes("bgm1")) unlockedMusic.push("bgm1");
+  
   const listEl = $("#music-list");
   listEl.innerHTML = "";
   MUSIC_LIST.forEach(m => {
@@ -910,13 +897,15 @@ $("#btn-load").addEventListener("click", () => {
 
   if (data.achievements && Array.isArray(data.achievements)) {
     ACHIEVEMENTS.forEach(ach => { if (data.achievements.includes(ach.id)) ach.unlocked = true; });
-    saveAchievements();
+    // 立即同步到本地
+    const unlockedIds = ACHIEVEMENTS.filter(a => a.unlocked).map(a => a.id);
+    localStorage.setItem("xbcb_achievements", JSON.stringify(unlockedIds));
     renderAchievements();
   }
   
   if (data.music && Array.isArray(data.music)) {
     data.music.forEach(m => { if (!unlockedMusic.includes(m)) unlockedMusic.push(m); });
-    saveMusicToStorage();
+    localStorage.setItem("xbcb_music", JSON.stringify(unlockedMusic));
     renderMusicRoom();
   }
 
@@ -1398,21 +1387,19 @@ $("#btn-save-game").addEventListener("click", () => {
 });
 
 $("#btn-confirm-reset").addEventListener("click", () => {
-  // 清空本地存储
-  try {
-    localStorage.removeItem("xbcb_achievements");
-    localStorage.removeItem("xbcb_music");
-  } catch(e) {}
+  // 清空存储
+  localStorage.removeItem("xbcb_achievements");
+  localStorage.removeItem("xbcb_music");
   
-  // 重置内存状态
+  // 重置内存
   ACHIEVEMENTS.forEach(ach => ach.unlocked = false);
-  unlockedMusic = []; // 先清空
-  progress = { v: 1, scene: "start", playerName: "", achievements: [], music: [], angeredSixin: false, hitCount: 0 };
-  document.getElementById("player-name").value = "";
+  unlockedMusic = ["bgm1"]; // 保留标题曲
   
-  // 【核心修复】重置后强制把标题曲塞回去并保存
-  unlockedMusic.push("bgm1");
-  saveMusicToStorage();
+  // 直接写入初始数据
+  localStorage.setItem("xbcb_music", JSON.stringify(unlockedMusic));
+  
+  progress = { v: 1, scene: "start", playerName: "", achievements: [], music: ["bgm1"], angeredSixin: false, hitCount: 0 };
+  document.getElementById("player-name").value = "";
   
   renderAchievements();
   renderMusicRoom();
@@ -1430,12 +1417,10 @@ $("#farewell-back").addEventListener("click", () => {
 });
 
 /* =========================================================
-   初始化执行顺序
+   初始化
    ========================================================= */
-loadAchievementsFromStorage();
-loadMusicFromStorage();  // 这里会合并本地数据，且默认自带 bgm1
 renderAchievements();
-renderMusicRoom();       // 强制渲染出来
+renderMusicRoom();      
 
 musicTitle.textContent = "莘逼晨成Book ~ We＆炸炸炸猪";
 </script>
