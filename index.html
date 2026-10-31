@@ -534,20 +534,36 @@ const MUSIC_LIST = [
   { id: "bgm3", name: "迷你世界里摘录的音乐", audio: bgm3 }
 ];
 
-let unlockedMusic = [];
+// 终极保险：哪怕浏览器阻止本地存储，内存里绝对要有标题曲
+let unlockedMusic = ["bgm1"]; 
+
 function loadMusicFromStorage() {
-  const saved = localStorage.getItem("xbcb_music");
-  if (saved) {
-    try { unlockedMusic = JSON.parse(saved); } catch(e){}
+  try {
+    const saved = localStorage.getItem("xbcb_music");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        parsed.forEach(id => {
+          if (!unlockedMusic.includes(id)) unlockedMusic.push(id);
+        });
+      }
+    }
+  } catch(e) {
+    console.warn("浏览器安全限制拦截了本地存储，数据刷新后会丢失。请使用存档码备份。");
   }
+  saveMusicToStorage();
 }
-function saveMusicToStorage() { localStorage.setItem("xbcb_music", JSON.stringify(unlockedMusic)); }
+
+function saveMusicToStorage() { 
+  try {
+    localStorage.setItem("xbcb_music", JSON.stringify(unlockedMusic)); 
+  } catch(e) {}
+}
 
 function unlockMusic(id) {
   if (!unlockedMusic.includes(id)) {
     unlockedMusic.push(id);
     saveMusicToStorage();
-    if ($("#modal-music").classList.contains("active")) renderMusicRoom();
   }
 }
 
@@ -603,7 +619,7 @@ volumeBtn.addEventListener('click', (e) => {
   updateVolumeIcon();
 });
 
-function switchMusic(newAudio, newTitle) {
+function switchMusic(newAudio, newTitle, musicId) {
   if (activeBgm !== newAudio) {
     activeBgm.pause();
     activeBgm.currentTime = 0; 
@@ -611,6 +627,8 @@ function switchMusic(newAudio, newTitle) {
   }
   musicTitle.textContent = newTitle;
   activeBgm.play().catch(e => console.log("需要用户交互才能播放"));
+  
+  if (musicId) unlockMusic(musicId);
   renderMusicRoom();
 }
 
@@ -697,15 +715,24 @@ let progress = {
 };
 
 function loadAchievementsFromStorage() {
-  const saved = localStorage.getItem("xbcb_achievements");
-  if (saved) {
-    try {
+  try {
+    const saved = localStorage.getItem("xbcb_achievements");
+    if (saved) {
       const parsed = JSON.parse(saved);
       ACHIEVEMENTS.forEach(ach => {
         if (parsed.includes(ach.id)) ach.unlocked = true;
       });
-    } catch(e) { console.error("成就数据解析失败"); }
+    }
+  } catch(e) {
+    console.warn("成就存储读取失败。");
   }
+}
+
+function saveAchievements() {
+  try {
+    const unlockedIds = ACHIEVEMENTS.filter(a => a.unlocked).map(a => a.id);
+    localStorage.setItem("xbcb_achievements", JSON.stringify(unlockedIds));
+  } catch(e) {}
 }
 
 function unlockAchievement(id) {
@@ -713,9 +740,8 @@ function unlockAchievement(id) {
   if (ach && !ach.unlocked) {
     ach.unlocked = true;
     if (!progress.achievements.includes(id)) progress.achievements.push(id);
-    const unlockedIds = ACHIEVEMENTS.filter(a => a.unlocked).map(a => a.id);
-    localStorage.setItem("xbcb_achievements", JSON.stringify(unlockedIds));
     
+    saveAchievements();
     playSfx(sfxAch);
     
     showToast(`解锁成就：${ach.name}`);
@@ -753,7 +779,7 @@ function renderMusicRoom() {
       item.innerHTML = `<div class="music-icon-status">${isPlaying ? '🎵' : '▶'}</div><div style="flex:1">${m.name}</div>`;
       item.onclick = () => {
         if (activeBgm === m.audio && !m.audio.paused) m.audio.pause();
-        else { switchMusic(m.audio, m.name); m.audio.play().catch(()=>{}); }
+        else { switchMusic(m.audio, m.name, m.id); m.audio.play().catch(()=>{}); }
         renderMusicRoom(); 
       };
     } else {
@@ -884,14 +910,14 @@ $("#btn-load").addEventListener("click", () => {
 
   if (data.achievements && Array.isArray(data.achievements)) {
     ACHIEVEMENTS.forEach(ach => { if (data.achievements.includes(ach.id)) ach.unlocked = true; });
-    const unlockedIds = ACHIEVEMENTS.filter(a => a.unlocked).map(a => a.id);
-    localStorage.setItem("xbcb_achievements", JSON.stringify(unlockedIds));
+    saveAchievements();
     renderAchievements();
   }
   
   if (data.music && Array.isArray(data.music)) {
     data.music.forEach(m => { if (!unlockedMusic.includes(m)) unlockedMusic.push(m); });
     saveMusicToStorage();
+    renderMusicRoom();
   }
 
   closeModal();
@@ -990,8 +1016,7 @@ function loadScene(sceneName) {
   switch (sceneName) {
     case "start":
       document.getElementById("screen-game").style.backgroundImage = "url('bg1.jpeg')";
-      switchMusic(bgm2, "KeraiWalk");
-      unlockMusic("bgm2");
+      switchMusic(bgm2, "KeraiWalk", "bgm2");
       typeWriter(`哦吼吼，逼然不美吗？你无法认识到它的美~让我给你介绍吧！\n\n末世来临，${pName}，选择你的酒店。`, storyText, () => {
         renderChoices();
       });
@@ -999,7 +1024,7 @@ function loadScene(sceneName) {
 
     case "stay_success":
       document.getElementById("screen-game").style.backgroundImage = "url('bg1.jpeg')";
-      switchMusic(bgm2, "KeraiWalk");
+      switchMusic(bgm2, "KeraiWalk", "bgm2");
       typeWriter("接下来该怎么做？", storyText, () => {
         renderChoices();
       });
@@ -1007,7 +1032,7 @@ function loadScene(sceneName) {
 
     case "restaurant_normal":
       document.getElementById("screen-game").style.backgroundImage = "url('bg.jpg')";
-      switchMusic(bgm2, "KeraiWalk");
+      switchMusic(bgm2, "KeraiWalk", "bgm2");
       typeWriter("这里有一家名叫莘莘之家的餐厅，要进去看看吗？", storyText, () => {
         const btnIn = document.createElement("button");
         btnIn.className = "story-btn";
@@ -1032,7 +1057,7 @@ function loadScene(sceneName) {
 
     case "restaurant_inside":
       document.getElementById("screen-game").style.backgroundImage = "url('bg4.jpg')";
-      switchMusic(bgm2, "KeraiWalk");
+      switchMusic(bgm2, "KeraiWalk", "bgm2");
       
       if (progress.angeredSixin) {
         if (progress.hitCount >= 5) {
@@ -1092,7 +1117,6 @@ function loadScene(sceneName) {
           btn2.textContent = "选项2：算了，看起来要倒闭了的样子，还是走吧。";
           btn2.onclick = () => {
             storyChoices.innerHTML = "";
-            // 【修改点】修改文本为（走了走了）
             typeWriter("（走了走了）", storyText, () => {
               setTimeout(() => loadScene("dog_encounter"), 2000); 
             });
@@ -1107,7 +1131,7 @@ function loadScene(sceneName) {
     case "cat_sixin":
       document.getElementById("screen-game").style.backgroundImage = "url('bg4.jpg')";
       showCharacterSprite("sixin2.png");
-      switchMusic(bgm2, "KeraiWalk");
+      switchMusic(bgm2, "KeraiWalk", "bgm2");
       
       typeWriter("喵~傻逼~喵~客官想吃点什么喵~", storyText, () => {
         const btn1 = document.createElement("button");
@@ -1115,7 +1139,6 @@ function loadScene(sceneName) {
         btn1.textContent = "选项1：卧槽尼玛！这是啥东西？？？快逃吧！";
         btn1.onclick = () => {
           storyChoices.innerHTML = "";
-          // 【修改点】修改文本为（走了走了）
           typeWriter("喵~傻逼~喵~\n\n（走了走了）", storyText, () => {
             setTimeout(() => loadScene("dog_encounter"), 2000);
           });
@@ -1171,8 +1194,7 @@ function loadScene(sceneName) {
     case "dog_encounter":
       document.getElementById("screen-game").style.backgroundImage = "url('bg.jpg')";
       showSceneImage("dog.png"); 
-      switchMusic(bgm3, "迷你世界里摘录的音乐");
-      unlockMusic("bgm3"); 
+      switchMusic(bgm3, "迷你世界里摘录的音乐", "bgm3"); 
       typeWriter("转身却遇到了一只狗？卧槽她要扑上来了！！！\n\n补好，是否要逃走？", storyText, () => {
         const btn1 = document.createElement("button");
         btn1.className = "story-btn";
@@ -1236,7 +1258,7 @@ function loadScene(sceneName) {
 
     case "hotel":
       document.getElementById("screen-game").style.backgroundImage = "url('bg1.jpeg')";
-      switchMusic(bgm2, "KeraiWalk");
+      switchMusic(bgm2, "KeraiWalk", "bgm2");
       typeWriter("你前往酒店安置自我……\n\n（酒店剧情待开发中，敬请期待！）", storyText, () => {
         const btn = document.createElement("button");
         btn.className = "story-btn";
@@ -1322,7 +1344,7 @@ function backToTitle() {
   }
   resetGameUI();
   showScreen("title");
-  switchMusic(bgm1, "莘逼晨晨Book ~ We＆炸炸炸猪");
+  switchMusic(bgm1, "莘逼晨晨Book ~ We＆炸炸炸猪", "bgm1");
 }
 
 $$(".menu-btn").forEach(btn => {
@@ -1376,12 +1398,22 @@ $("#btn-save-game").addEventListener("click", () => {
 });
 
 $("#btn-confirm-reset").addEventListener("click", () => {
-  localStorage.removeItem("xbcb_achievements");
-  localStorage.removeItem("xbcb_music");
+  // 清空本地存储
+  try {
+    localStorage.removeItem("xbcb_achievements");
+    localStorage.removeItem("xbcb_music");
+  } catch(e) {}
+  
+  // 重置内存状态
   ACHIEVEMENTS.forEach(ach => ach.unlocked = false);
-  unlockedMusic = [];
+  unlockedMusic = []; // 先清空
   progress = { v: 1, scene: "start", playerName: "", achievements: [], music: [], angeredSixin: false, hitCount: 0 };
   document.getElementById("player-name").value = "";
+  
+  // 【核心修复】重置后强制把标题曲塞回去并保存
+  unlockedMusic.push("bgm1");
+  saveMusicToStorage();
+  
   renderAchievements();
   renderMusicRoom();
   resetGameUI();
@@ -1397,12 +1429,14 @@ $("#farewell-back").addEventListener("click", () => {
   $("#farewell").classList.remove("show"); backToTitle();
 });
 
+/* =========================================================
+   初始化执行顺序
+   ========================================================= */
 loadAchievementsFromStorage();
-loadMusicFromStorage();
+loadMusicFromStorage();  // 这里会合并本地数据，且默认自带 bgm1
 renderAchievements();
-renderMusicRoom();
+renderMusicRoom();       // 强制渲染出来
 
-unlockMusic("bgm1");
 musicTitle.textContent = "莘逼晨成Book ~ We＆炸炸炸猪";
 </script>
 </body>
