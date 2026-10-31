@@ -324,7 +324,6 @@
     <h2>💀 你晕死了过去！</h2>
     <p>解锁Bad Ending1：<span class="gold-text">您是有多福大命大？？</span></p>
     <p style="font-size:13px; color:#889;">快去成就页面看看解锁的结局吧。</p>
-    <!-- 将按钮改成了返回标题，并绑定了事件 -->
     <button class="primary-btn" id="btn-ending-back" style="margin-top:15px;">返回标题界面</button>
   </div>
 </div>
@@ -351,6 +350,8 @@
       <button class="menu-btn" data-action="start">开始游戏</button>
       <button class="menu-btn" data-action="save">读取存档</button>
       <button class="menu-btn" data-action="achieve">成 就</button>
+      <!-- 新增：初始化按钮 -->
+      <button class="menu-btn" data-action="reset" style="color: #d9736b; border-color: rgba(217,115,107,.2);">初 始 化</button>
       <button class="menu-btn" data-action="quit">退出游戏</button>
     </nav>
   </div>
@@ -399,6 +400,18 @@
     <div class="modal-head"><h2>成 就</h2><button class="close-btn" data-close>✕</button></div>
     <p class="hint" style="margin-bottom:14px;">见证你在莘莘之家的每一步足迹。</p>
     <div class="achieve-grid" id="achieve-grid"></div>
+  </div>
+
+  <!-- 初始化确认弹窗 -->
+  <div class="modal" id="modal-reset">
+    <div class="modal-head"><h2>初 始 化</h2><button class="close-btn" data-close>✕</button></div>
+    <p class="hint" style="margin-bottom:20px; color: #d9736b;">
+      警告：此操作将清空所有已解锁的成就记录，且无法撤销。确定要重置一切吗？
+    </p>
+    <div style="display:flex; gap:10px;">
+      <button class="ghost-btn" style="flex:1; padding:13px;" data-close>取消</button>
+      <button class="primary-btn" id="btn-confirm-reset" style="flex:1; border-color:#d9736b; color:#d9736b;">确认重置</button>
+    </div>
   </div>
 
   <!-- 退出弹窗 -->
@@ -514,7 +527,6 @@ let ACHIEVEMENTS = [
   { id: "ach2", name: "Bad Ending1：您是有多福大命大？？", unlocked: false, src: "bg1.jpeg" }
 ];
 
-// 读取本地保存的成就
 function loadAchievements() {
   const saved = localStorage.getItem("xbcb_achievements");
   if (saved) {
@@ -527,7 +539,6 @@ function loadAchievements() {
   }
 }
 
-// 保存成就到本地
 function saveAchievements() {
   const unlockedIds = ACHIEVEMENTS.filter(a => a.unlocked).map(a => a.id);
   localStorage.setItem("xbcb_achievements", JSON.stringify(unlockedIds));
@@ -563,7 +574,7 @@ function unlockAchievement(id) {
   const ach = ACHIEVEMENTS.find(a => a.id === id);
   if (ach && !ach.unlocked) {
     ach.unlocked = true;
-    saveAchievements(); // 解锁时保存
+    saveAchievements(); 
     showToast(`解锁成就：${ach.name}`);
     if ($("#modal-achieve").classList.contains("active")) {
       renderAchievements();
@@ -696,7 +707,6 @@ function typeWriter(text, element, callback) {
   }, 60); 
 }
 
-// 重置游戏画面UI（返回标题或重开时用）
 function resetGameUI() {
   clearInterval(typingTimer);
   storyText.innerHTML = "";
@@ -708,7 +718,7 @@ function resetGameUI() {
 
 function enterGame() {
   showScreen("game");
-  resetGameUI(); // 确保清理黑屏状态
+  resetGameUI(); 
 
   switchMusic(bgm2, "KeraiWalk");
 
@@ -763,7 +773,6 @@ function triggerBadEnd1() {
   }, 2000); 
 }
 
-// 选项2和3
 function chooseRestaurant() {
   typeWriter("你走向了餐厅寻求庇护……\n\n（餐厅剧情待开发中，敬请期待！）", storyText, () => {
     const btn = document.createElement("button");
@@ -790,15 +799,15 @@ function chooseHotel() {
   });
 }
 
-// 结局弹窗里的返回标题按钮
 document.getElementById("btn-ending-back").onclick = () => {
   resetGameUI();
   showScreen("title");
   switchMusic(bgm1, "莘逼晨晨Book ~ We＆炸炸炸猪");
 };
 
+
 /* =========================================================
-   6. 菜单与按钮事件绑定
+   6. 菜单、重置与按钮事件绑定
    ========================================================= */
 $$(".menu-btn").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -817,8 +826,31 @@ $$(".menu-btn").forEach(btn => {
       renderAchievements(); 
       openModal("modal-achieve");
     }
+    if (action === "reset"){
+      openModal("modal-reset"); // 打开重置确认弹窗
+    }
     if (action === "quit"){ openModal("modal-quit"); }
   });
+});
+
+// 确认重置逻辑
+$("#btn-confirm-reset").addEventListener("click", () => {
+  // 1. 清空本地存储
+  localStorage.removeItem("xbcb_achievements");
+  
+  // 2. 重置内存中的成就数据
+  ACHIEVEMENTS.forEach(ach => ach.unlocked = false);
+  
+  // 3. 清空当前进度
+  progress = null;
+  
+  // 4. 刷新UI
+  renderAchievements();
+  resetGameUI();
+  
+  // 5. 提示并关闭弹窗
+  showToast("游戏数据已初始化");
+  closeModal();
 });
 
 $("#btn-back").addEventListener("click", () => { 
