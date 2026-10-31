@@ -50,32 +50,33 @@
     90% { transform: translate(2px, 2px) rotate(0deg); }
     100% { transform: translate(2px, -2px) rotate(-1deg); }
   }
-  .shaking {
-    animation: shake 0.4s infinite;
+  .shaking { animation: shake 0.4s infinite; }
+
+  /* 红温警告遮罩 */
+  .red-hot-overlay {
+    position: fixed; inset: 0; z-index: 85;
+    background: radial-gradient(circle, rgba(255,0,0,0.3) 0%, rgba(255,0,0,0.8) 100%);
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s ease;
+    mix-blend-mode: multiply;
+  }
+  .red-hot-overlay.active {
+    opacity: 1;
+    animation: redPulse 0.5s infinite alternate;
+  }
+  @keyframes redPulse {
+    from { opacity: 0.5; }
+    to { opacity: 1; }
   }
 
   /* ============ 标题画面背景 ============ */
   #screen-title { overflow: hidden; background: #000; }
-  .bg-container {
-    position: absolute; inset: 0; z-index: 0; overflow: hidden;
-  }
-  .bg-image {
-    position: absolute; left: 0; top: 50%;
-    transform: translateY(-50%);
-    will-change: transform; pointer-events: none;
-  }
-  .bg-overlay {
-    position: absolute; inset: 0; z-index: 1;
-    background: radial-gradient(circle at center, rgba(6, 7, 11, 0.45) 0%, rgba(6, 7, 11, 0.85) 100%);
-    pointer-events: none;
-  }
+  .bg-container { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+  .bg-image { position: absolute; left: 0; top: 50%; transform: translateY(-50%); will-change: transform; pointer-events: none; }
+  .bg-overlay { position: absolute; inset: 0; z-index: 1; background: radial-gradient(circle at center, rgba(6, 7, 11, 0.45) 0%, rgba(6, 7, 11, 0.85) 100%); pointer-events: none; }
 
   /* 标题内容层 */
-  .title-content {
-    position: relative; z-index: 2;
-    display: flex; flex-direction: column;
-    align-items: center; width: 100%;
-  }
+  .title-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; width: 100%; }
   .title-wrap{text-align:center; margin-bottom:30px;}
   .subtitle{margin:0 0 20px; min-height:1em; font-size:11px; letter-spacing:.5em; text-indent:.5em; color:var(--dim);}
   .game-title{
@@ -110,23 +111,12 @@
     cursor:pointer; backdrop-filter: blur(4px);
     transition:background .22s, border-color .22s, color .22s, transform .22s;
   }
-  .menu-btn::before{
-    content:""; position:absolute; left:0; top:50%;
-    width:2px; height:0; background:var(--gold);
-    transform:translateY(-50%); transition:height .26s ease;
-  }
-  .menu-btn:hover{
-    background:rgba(217,164,65,.15); border-color:rgba(217,164,65,.45);
-    color:#f2e8d2; transform:translateX(3px);
-  }
+  .menu-btn::before{content:""; position:absolute; left:0; top:50%; width:2px; height:0; background:var(--gold); transform:translateY(-50%); transition:height .26s ease;}
+  .menu-btn:hover{background:rgba(217,164,65,.15); border-color:rgba(217,164,65,.45); color:#f2e8d2; transform:translateX(3px);}
   .menu-btn:hover::before{height:60%;}
   .menu-btn:active{transform:translateX(1px) scale(.995);}
 
-  .foot{
-    position:absolute; bottom:22px; left:0; right:0;
-    text-align:center; font-size:11px; letter-spacing:.22em;
-    color:rgba(111,120,137,.6); z-index: 2;
-  }
+  .foot{position:absolute; bottom:22px; left:0; right:0; text-align:center; font-size:11px; letter-spacing:.22em; color:rgba(111,120,137,.6); z-index: 2;}
 
   /* ============ 音乐播放器 & 音量控制 UI ============ */
   .music-player {
@@ -148,144 +138,135 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 12px; transition: all 0.3s; pointer-events: none;
   }
-  .music-player.playing .music-btn {
-    animation: spin 4s linear infinite;
-    background: var(--gold); color: #000;
-  }
+  .music-player.playing .music-btn { animation: spin 4s linear infinite; background: var(--gold); color: #000; }
   @keyframes spin { 100% { transform: rotate(360deg); } }
 
-  .music-title {
-    font-size: 12px; letter-spacing: 0.05em; color: var(--text);
-    max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    font-family: sans-serif; transition: color 0.3s; pointer-events: none;
-  }
+  .music-title { font-size: 12px; letter-spacing: 0.05em; color: var(--text); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: sans-serif; transition: color 0.3s; pointer-events: none; }
   .music-player.playing .music-title { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.3); }
 
-  .volume-wrap {
-    display: flex; align-items: center; gap: 6px;
-    padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.15);
-  }
+  .volume-wrap { display: flex; align-items: center; gap: 6px; padding-left: 12px; border-left: 1px solid rgba(255,255,255,0.15); }
   .volume-icon { font-size: 14px; cursor: pointer; user-select: none; transition: transform 0.2s; }
   .volume-icon:hover { transform: scale(1.15); }
   
-  #volume-slider {
-    -webkit-appearance: none; appearance: none;
-    width: 60px; height: 4px; 
-    background: rgba(255,255,255,0.2); border-radius: 2px; 
-    outline: none; cursor: pointer;
-  }
-  #volume-slider::-webkit-slider-thumb {
-    -webkit-appearance: none; appearance: none;
-    width: 12px; height: 12px; background: var(--gold);
-    border-radius: 50%; cursor: pointer; transition: transform 0.1s;
-  }
+  #volume-slider { -webkit-appearance: none; appearance: none; width: 60px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; outline: none; cursor: pointer; }
+  #volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 12px; height: 12px; background: var(--gold); border-radius: 50%; cursor: pointer; transition: transform 0.1s; }
   #volume-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
-  #volume-slider::-moz-range-thumb {
-    width: 12px; height: 12px; background: var(--gold);
-    border-radius: 50%; cursor: pointer; border: none; transition: transform 0.1s;
-  }
+  #volume-slider::-moz-range-thumb { width: 12px; height: 12px; background: var(--gold); border-radius: 50%; cursor: pointer; border: none; transition: transform 0.1s; }
   #volume-slider::-moz-range-thumb:hover { transform: scale(1.2); }
 
-  @media (max-width: 600px) {
-    .music-title { display: none; }
-    #volume-slider { width: 40px; }
-  }
+  @media (max-width: 600px) { .music-title { display: none; } #volume-slider { width: 40px; } }
 
   /* ============ 游戏画面 ============ */
   #screen-game{
     justify-content:flex-start; padding:0;
-    background-image: url('bg1.jpeg');
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
+    background-image: url('bg1.jpeg'); background-position: center; background-size: cover; background-repeat: no-repeat;
     position: fixed; inset: 0;
-    transition: filter 1.5s ease;
+    transition: filter 1.5s ease, background-image 0.5s ease;
   }
-  #screen-game::before {
-    content: ""; position: absolute; inset: 0;
-    background: rgba(6, 7, 11, 0.75); z-index: 0;
-    transition: background 0.5s ease; pointer-events: none;
-  }
-  #screen-game.glitch-mode::before {
-    background: rgba(6, 7, 11, 0.1) !important;
+  
+  /* 正常遮罩 */
+  #screen-game::before { content: ""; position: absolute; inset: 0; background: rgba(6, 7, 11, 0.75); z-index: 0; transition: background 0.5s ease; pointer-events: none; }
+  /* 异常闪烁遮罩（极度透明） */
+  #screen-game.glitch-mode::before { background: rgba(6, 7, 11, 0.1) !important; transition: none !important; }
+
+  /* 专门用来闪烁的底层容器 */
+  #glitch-bg-container {
+    position: absolute; inset: 0; z-index: 1; display: none;
+    background-size: cover; background-position: center;
+    background-color: #000;
   }
 
+  /* 右侧专属立绘层（丝莘） */
+  #character-sprite {
+    position: fixed; 
+    bottom: -5vh; 
+    right: 0; 
+    height: 75vh; 
+    max-width: 90vw;
+    z-index: 2; 
+    opacity: 0; 
+    pointer-events: none;
+    filter: drop-shadow(-10px 10px 20px rgba(0,0,0,0.8));
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), right 0.5s, bottom 0.5s;
+    transform: translateY(20px) scale(0.95);
+  }
+  #character-sprite.show { opacity: 1; transform: translateY(0) scale(1); }
+  
+  /* 冲刺特效：居中放大，覆盖原有样式 */
+  #character-sprite.sprint {
+    right: 50% !important;
+    bottom: 50% !important;
+    transform: translate(50%, 50%) scale(2.8) !important;
+    transition: all 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
+    z-index: 86; /* 红温层之上，黑屏之下 */
+  }
+
+  /* 左侧专属立绘层（炸猪排） */
+  #left-character-sprite {
+    position: fixed; 
+    bottom: 10vh; 
+    left: 2vw; 
+    height: 45vh; 
+    max-width: 40vw;
+    z-index: 2; 
+    opacity: 0; 
+    pointer-events: none;
+    border-radius: 15px;
+    box-shadow: 10px 10px 20px rgba(0,0,0,0.8);
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: translateY(20px) scale(0.95);
+  }
+  #left-character-sprite.show { opacity: 1; transform: translateY(0) scale(1); }
+
   .game-wrap{
-    width:100%; max-width:720px; height:100%; 
-    padding:20px 22px; display:flex; flex-direction:column; gap:22px;
-    position: relative; z-index: 1;
+    width:100%; max-width:720px; height:100%; padding:20px 22px; display:flex; flex-direction:column; gap:22px;
+    position: relative; z-index: 3; 
     will-change: transform; 
   }
   
-  .game-head{
-    display:flex; justify-content:space-between; align-items:center; 
-    gap:12px; padding-bottom:14px; border-bottom:1px solid var(--line);
-  }
-  
-  .game-body{
-    flex:1; display:flex; flex-direction:column; 
-    align-items:flex-start; justify-content:flex-start; 
-    padding-top:20px; text-align:left; overflow-y: auto;
-  }
+  .game-head{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:14px; border-bottom:1px solid var(--line); }
+  .game-body{ flex:1; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; padding-top:20px; text-align:left; overflow-y: auto; }
   .game-body::-webkit-scrollbar{width:6px;}
   .game-body::-webkit-scrollbar-thumb{background:#2a3244; border-radius:3px;}
 
-  #scene-image-container {
-    width: 100%; text-align: center; margin-bottom: 20px;
+  #scene-image-container { 
+    width: 100%; text-align: center; margin-bottom: 20px; 
     display: none;
   }
   #scene-image {
-    max-width: 100%; max-height: 40vh; border-radius: 10px;
+    max-width: 80%; max-height: 40vh; border-radius: 10px;
     border: 1px solid var(--line); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2);
   }
 
   #story-text {
     font-size: 16.5px; line-height: 2; letter-spacing: .05em;
-    color: var(--text); white-space: pre-wrap; 
-    margin-bottom: 30px; min-height: 120px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-    width: 100%;
+    color: var(--text); white-space: pre-wrap; margin-bottom: 30px; min-height: 120px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8); width: 100%;
+    background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+    padding: 15px; border-radius: 10px;
   }
   
-  #story-choices {
-    display: flex; flex-direction: column; gap: 12px;
-    width: 100%; margin-bottom: 20px;
-  }
+  #story-choices { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-bottom: 20px; }
   .story-btn {
-    width: 100%; padding: 14px 18px;
-    background: rgba(255,255,255,.05); border: 1px solid var(--line);
-    border-radius: 8px; color: var(--text);
-    font: inherit; font-size: 15px; text-align: left;
+    width: 100%; padding: 14px 18px; background: rgba(6,7,11,.85); border: 1px solid var(--line);
+    border-radius: 8px; color: var(--text); font: inherit; font-size: 15px; text-align: left;
     cursor: pointer; transition: .2s; backdrop-filter: blur(4px);
   }
-  .story-btn:hover {
-    background: rgba(217,164,65,.15); border-color: rgba(217,164,65,.5);
-    transform: translateX(4px); color: #fff;
-  }
+  .story-btn:hover { background: rgba(217,164,65,.15); border-color: rgba(217,164,65,.5); transform: translateX(4px); color: #fff; }
 
-  .screen-dark {
-    position: fixed; inset: 0; z-index: 80;
-    background: #000; opacity: 0; pointer-events: none;
-    transition: opacity 2s ease;
-  }
+  .screen-dark { position: fixed; inset: 0; z-index: 80; background: #000; opacity: 0; pointer-events: none; transition: opacity 2s ease; }
   .screen-dark.active { opacity: 1; pointer-events: auto; }
 
   .ending-modal {
-    position: fixed; inset: 0; z-index: 90;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.5s ease; padding: 20px;
+    position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.5s ease; padding: 20px;
   }
   .ending-modal.active { opacity: 1; pointer-events: auto; }
   
   .ending-box {
-    background: linear-gradient(180deg, #121724 0%, #0c1019 100%);
-    border: 1px solid #d9736b; border-radius: 14px;
-    padding: 30px 40px; text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.9);
-    max-width: 500px; width: 100%;
+    background: linear-gradient(180deg, #121724 0%, #0c1019 100%); border: 1px solid #d9736b; border-radius: 14px;
+    padding: 30px 40px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.9); max-width: 500px; width: 100%;
   }
   .ending-box h2 { color: #d9736b; margin-top: 0; font-size: 20px; letter-spacing: 2px; }
   .ending-box p { color: var(--text); line-height: 2; margin: 15px 0; font-size: 15px;}
@@ -325,8 +306,7 @@
 
   .achieve-grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:12px;}
   .achieve-item{
-    position:relative; aspect-ratio:16/10; 
-    display:flex; flex-direction:column;
+    position:relative; aspect-ratio:16/10; display:flex; flex-direction:column;
     align-items:center; justify-content:center; gap:6px;
     border-radius:10px; border:1px solid var(--line);
     background:rgba(255,255,255,.02); font-size:12px;
@@ -334,27 +314,23 @@
   }
   .achieve-item .lock{font-size:18px; opacity:.5;}
   .achieve-item.locked:hover{border-color:rgba(255,255,255,.16);}
-  
   .achieve-item.unlocked{ border-color:rgba(217,164,65,.4); cursor:default; }
-  .achieve-item.unlocked .achieve-bg {
-    position:absolute; inset:0; background-size:cover; background-position:center;
-    opacity:0.6; transition:0.3s;
-  }
+  .achieve-item.unlocked .achieve-bg { position:absolute; inset:0; background-size:cover; background-position:center; opacity:0.6; transition:0.3s; }
   .achieve-item.unlocked:hover .achieve-bg { opacity:0.8; }
-  .achieve-item.unlocked .achieve-name {
-    position:relative; z-index:1; color:#fff; font-weight:bold;
-    text-shadow: 0 2px 6px #000; text-align:center; padding:0 8px;
-  }
-  .achieve-item.unlocked::after {
-    content:""; position:absolute; inset:0;
-    background:linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-  }
+  .achieve-item.unlocked .achieve-name { position:relative; z-index:1; color:#fff; font-weight:bold; text-shadow: 0 2px 6px #000; text-align:center; padding:0 8px; }
+  .achieve-item.unlocked::after { content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.9), transparent); }
+
+  .music-list { display:flex; flex-direction:column; gap:10px; }
+  .music-item { display:flex; align-items:center; gap:12px; padding:14px 18px; border-radius:8px; border:1px solid var(--line); background:rgba(255,255,255,.02); transition:.2s; }
+  .music-item.unlocked { cursor:pointer; color:var(--text); }
+  .music-item.unlocked:hover { background:rgba(217,164,65,.1); border-color:rgba(217,164,65,.4); }
+  .music-item.playing { border-color:var(--gold); background:rgba(217,164,65,.15); color:#fff; font-weight:bold; }
+  .music-item.locked { color:var(--dim); }
+  .music-icon-status { font-size:16px; width:20px; text-align:center; }
 
   .toast {
-    position: fixed; top: 80px; left: 50%;
-    transform: translate(-50%, -20px);
-    background: rgba(6, 7, 11, 0.95);
-    border: 1px solid var(--gold);
+    position: fixed; top: 80px; left: 50%; transform: translate(-50%, -20px);
+    background: rgba(6, 7, 11, 0.95); border: 1px solid var(--gold);
     color: var(--gold); padding: 12px 24px; border-radius: 30px;
     font-size: 14px; letter-spacing: .1em; font-weight: bold;
     z-index: 1000; opacity: 0; pointer-events: none;
@@ -378,10 +354,15 @@
 </head>
 <body>
 
-<!-- 新增了 bgm3 -->
+<!-- BGM -->
 <audio id="bgm1" src="bgm1.mp3" loop></audio>
 <audio id="bgm2" src="bgm2.mp3" loop></audio>
 <audio id="bgm3" src="bgm3.ogg" loop></audio>
+<!-- 音效 -->
+<audio id="sfx-alert" src="alert.wav"></audio>
+<audio id="sfx-achievement" src="achievement.wav"></audio>
+
+<div id="red-screen" class="red-hot-overlay"></div>
 
 <div id="music-player" class="music-player" title="播放器">
   <div class="music-main" id="music-main" title="点击播放/暂停">
@@ -428,6 +409,7 @@
       <button class="menu-btn" data-action="start">开始游戏</button>
       <button class="menu-btn" data-action="save">读取存档</button>
       <button class="menu-btn" data-action="achieve">成 就</button>
+      <button class="menu-btn" data-action="music-room">音 乐 室</button>
       <button class="menu-btn" data-action="reset" style="color: #d9736b; border-color: rgba(217,115,107,.2);">初 始 化</button>
       <button class="menu-btn" data-action="quit">退出游戏</button>
     </nav>
@@ -436,6 +418,10 @@
 </main>
 
 <section id="screen-game" class="screen">
+  <div id="glitch-bg-container"></div>
+  <img id="left-character-sprite" src="" alt="左侧图片">
+  <img id="character-sprite" src="" alt="立绘">
+
   <div class="game-wrap">
     <header class="game-head">
       <button class="ghost-btn" id="btn-back">← 返回标题</button>
@@ -479,10 +465,16 @@
     <div class="achieve-grid" id="achieve-grid"></div>
   </div>
 
+  <div class="modal" id="modal-music">
+    <div class="modal-head"><h2>音 乐 室</h2><button class="close-btn" data-close>✕</button></div>
+    <p class="hint" style="margin-bottom:14px;">聆听你在莘莘之家留下的旋律。</p>
+    <div class="music-list" id="music-list"></div>
+  </div>
+
   <div class="modal" id="modal-reset">
     <div class="modal-head"><h2>初 始 化</h2><button class="close-btn" data-close>✕</button></div>
     <p class="hint" style="margin-bottom:20px; color: #d9736b;">
-      警告：此操作将清空所有已解锁的成就记录，且无法撤销。确定要重置一切吗？
+      警告：此操作将清空所有已解锁的成就和音乐记录，且无法撤销。确定要重置一切吗？
     </p>
     <div style="display:flex; gap:10px;">
       <button class="ghost-btn" style="flex:1; padding:13px;" data-close>取消</button>
@@ -510,18 +502,21 @@
 /* =========================================================
    0. 资源预加载
    ========================================================= */
-const imgPreload = ['bg.jpg', 'bg1.jpeg', 'bg2.png', 'bg3.png', 'bg4.jpg', 'dog.png'];
+const imgPreload = ['bg.jpg', 'bg1.jpeg', 'bg2.png', 'bg3.png', 'bg4.jpg', 'dog.png', 'sixin2.png', 'zzzz.jpg'];
 imgPreload.forEach(src => {
   const img = new Image();
   img.src = src;
 });
 
 /* =========================================================
-   1. 音乐播放与音量控制逻辑
+   1. 音乐/音效播放与音量控制逻辑
    ========================================================= */
 const bgm1 = document.getElementById('bgm1');
 const bgm2 = document.getElementById('bgm2');
 const bgm3 = document.getElementById('bgm3');
+const sfxAlert = document.getElementById('sfx-alert');
+const sfxAch = document.getElementById('sfx-achievement');
+
 const musicPlayer = document.getElementById('music-player');
 const musicMain = document.getElementById('music-main');
 const musicIcon = document.getElementById('music-icon');
@@ -533,10 +528,42 @@ const volumeSlider = document.getElementById('volume-slider');
 let activeBgm = bgm1; 
 let currentVolume = 0.5; 
 
-// 初始化所有音乐音量
+const MUSIC_LIST = [
+  { id: "bgm1", name: "莘逼晨晨Book ~ We＆炸炸炸猪", audio: bgm1 },
+  { id: "bgm2", name: "KeraiWalk", audio: bgm2 },
+  { id: "bgm3", name: "迷你世界里摘录的音乐", audio: bgm3 }
+];
+
+let unlockedMusic = [];
+function loadMusicFromStorage() {
+  const saved = localStorage.getItem("xbcb_music");
+  if (saved) {
+    try { unlockedMusic = JSON.parse(saved); } catch(e){}
+  }
+}
+function saveMusicToStorage() { localStorage.setItem("xbcb_music", JSON.stringify(unlockedMusic)); }
+
+function unlockMusic(id) {
+  if (!unlockedMusic.includes(id)) {
+    unlockedMusic.push(id);
+    saveMusicToStorage();
+    if ($("#modal-music").classList.contains("active")) renderMusicRoom();
+  }
+}
+
+// 初始化音量
 bgm1.volume = currentVolume;
 bgm2.volume = currentVolume;
 bgm3.volume = currentVolume;
+sfxAlert.volume = currentVolume;
+sfxAch.volume = currentVolume;
+
+// 通用播放音效函数
+function playSfx(audioObj) {
+  if (!audioObj) return;
+  audioObj.currentTime = 0;
+  audioObj.play().catch(() => {});
+}
 
 function updateVolumeIcon() {
   if (currentVolume === 0) volumeBtn.textContent = '🔇';
@@ -550,6 +577,8 @@ volumeSlider.addEventListener('input', (e) => {
   bgm1.volume = currentVolume;
   bgm2.volume = currentVolume;
   bgm3.volume = currentVolume;
+  sfxAlert.volume = currentVolume;
+  sfxAch.volume = currentVolume;
   updateVolumeIcon();
 });
 
@@ -569,6 +598,8 @@ volumeBtn.addEventListener('click', (e) => {
   bgm1.volume = currentVolume;
   bgm2.volume = currentVolume;
   bgm3.volume = currentVolume;
+  sfxAlert.volume = currentVolume;
+  sfxAch.volume = currentVolume;
   updateVolumeIcon();
 });
 
@@ -580,6 +611,7 @@ function switchMusic(newAudio, newTitle) {
   }
   musicTitle.textContent = newTitle;
   activeBgm.play().catch(e => console.log("需要用户交互才能播放"));
+  renderMusicRoom();
 }
 
 [bgm1, bgm2, bgm3].forEach(audio => {
@@ -650,14 +682,18 @@ requestAnimationFrame(animateBg);
 let ACHIEVEMENTS = [
   { id: "ach1", name: "欢迎光临莘莘之家！", unlocked: false, src: "bg.jpg" },
   { id: "ach2", name: "Bad Ending1：您是有多福大命大？？", unlocked: false, src: "bg1.jpeg" },
-  { id: "ach3", name: "Bad Ending2：连只狗都打不过。", unlocked: false, src: "dog.png" }
+  { id: "ach3", name: "Bad Ending2：连只狗都打不过。", unlocked: false, src: "dog.png" },
+  { id: "hidden1", name: "Hidden Ending1：女莘力量！！", unlocked: false, src: "sixin2.png", isHidden: true }
 ];
 
 let progress = {
   v: 1,
   scene: "start", 
   playerName: "", 
-  achievements: [] 
+  achievements: [],
+  music: [],
+  angeredSixin: false,
+  hitCount: 0 
 };
 
 function loadAchievementsFromStorage() {
@@ -680,6 +716,8 @@ function unlockAchievement(id) {
     const unlockedIds = ACHIEVEMENTS.filter(a => a.unlocked).map(a => a.id);
     localStorage.setItem("xbcb_achievements", JSON.stringify(unlockedIds));
     
+    playSfx(sfxAch);
+    
     showToast(`解锁成就：${ach.name}`);
     if ($("#modal-achieve").classList.contains("active")) renderAchievements();
   }
@@ -688,18 +726,40 @@ function unlockAchievement(id) {
 function renderAchievements() {
   const grid = $("#achieve-grid"); 
   grid.innerHTML = "";
+  
   ACHIEVEMENTS.forEach(ach => {
+    if (ach.isHidden && !ach.unlocked) return;
+
     const item = document.createElement("div");
     item.className = "achieve-item " + (ach.unlocked ? "unlocked" : "locked");
     if (ach.unlocked) {
-      item.innerHTML = `
-        <div class="achieve-bg" style="background-image: url('${ach.src}')"></div>
-        <span class="achieve-name">${ach.name}</span>
-      `;
+      item.innerHTML = `<div class="achieve-bg" style="background-image: url('${ach.src}')"></div><span class="achieve-name">${ach.name}</span>`;
     } else {
       item.innerHTML = `<span class="lock">🔒</span><span>未解锁</span>`;
     }
     grid.appendChild(item);
+  });
+}
+
+function renderMusicRoom() {
+  const listEl = $("#music-list");
+  listEl.innerHTML = "";
+  MUSIC_LIST.forEach(m => {
+    const isUnlocked = unlockedMusic.includes(m.id);
+    const isPlaying = (activeBgm === m.audio && !m.audio.paused);
+    const item = document.createElement("div");
+    item.className = "music-item " + (isUnlocked ? "unlocked" : "locked") + (isPlaying ? " playing" : "");
+    if (isUnlocked) {
+      item.innerHTML = `<div class="music-icon-status">${isPlaying ? '🎵' : '▶'}</div><div style="flex:1">${m.name}</div>`;
+      item.onclick = () => {
+        if (activeBgm === m.audio && !m.audio.paused) m.audio.pause();
+        else { switchMusic(m.audio, m.name); m.audio.play().catch(()=>{}); }
+        renderMusicRoom(); 
+      };
+    } else {
+      item.innerHTML = `<div class="music-icon-status">🔒</div><div style="flex:1">未解锁的旋律</div>`;
+    }
+    listEl.appendChild(item);
   });
 }
 
@@ -783,12 +843,12 @@ function refreshSaveCode(){
     saveOut.value = "";
     return;
   }
-
   if (progress.scene !== "start" && !screens.game.classList.contains("active")) {
     genHint.textContent = "当前没有激活的游戏进度。";
     saveOut.value = "";
     return;
   }
+  progress.music = unlockedMusic;
   genHint.textContent = "当前进度位于：" + progress.scene + "。把这串码保存好，下次粘贴即可回到当前进度。";
   saveOut.value = encodeSave(progress);
 }
@@ -818,16 +878,20 @@ $("#btn-load").addEventListener("click", () => {
   }
 
   progress = data;
+  if (progress.hitCount === undefined) progress.hitCount = 0; 
   
   if (data.playerName) document.getElementById("player-name").value = data.playerName;
 
   if (data.achievements && Array.isArray(data.achievements)) {
-    ACHIEVEMENTS.forEach(ach => {
-      if (data.achievements.includes(ach.id)) ach.unlocked = true;
-    });
+    ACHIEVEMENTS.forEach(ach => { if (data.achievements.includes(ach.id)) ach.unlocked = true; });
     const unlockedIds = ACHIEVEMENTS.filter(a => a.unlocked).map(a => a.id);
     localStorage.setItem("xbcb_achievements", JSON.stringify(unlockedIds));
     renderAchievements();
+  }
+  
+  if (data.music && Array.isArray(data.music)) {
+    data.music.forEach(m => { if (!unlockedMusic.includes(m)) unlockedMusic.push(m); });
+    saveMusicToStorage();
   }
 
   closeModal();
@@ -841,6 +905,10 @@ $("#btn-load").addEventListener("click", () => {
    ========================================================= */
 let typingTimer = null;
 let glitchInterval = null;
+
+const charSprite = document.getElementById('character-sprite');
+const leftCharSprite = document.getElementById('left-character-sprite');
+const glitchBgContainer = document.getElementById('glitch-bg-container');
 
 function typeWriter(text, element, callback) {
   clearInterval(typingTimer);
@@ -858,6 +926,23 @@ function typeWriter(text, element, callback) {
   }, 60); 
 }
 
+function showCharacterSprite(src) {
+  charSprite.src = src;
+  charSprite.classList.add('show');
+}
+function hideCharacterSprite() {
+  charSprite.classList.remove('show');
+  charSprite.classList.remove('sprint');
+}
+
+function showLeftCharSprite(src) {
+  leftCharSprite.src = src;
+  leftCharSprite.classList.add('show');
+}
+function hideLeftCharSprite() {
+  leftCharSprite.classList.remove('show');
+}
+
 function resetGameUI() {
   clearInterval(typingTimer);
   clearInterval(glitchInterval);
@@ -867,12 +952,19 @@ function resetGameUI() {
   document.getElementById("dark-screen").classList.remove("active");
   document.getElementById("ending-modal").classList.remove("active");
   
+  document.getElementById("red-screen").classList.remove("active");
   document.querySelector(".game-wrap").classList.remove("shaking");
   
   sceneImageContainer.style.display = "none";
   sceneImage.src = "";
   sceneImage.style.transform = "scale(1)";
+  
+  hideCharacterSprite(); 
+  hideLeftCharSprite(); 
 
+  glitchBgContainer.style.display = "none";
+  glitchBgContainer.style.backgroundImage = "none";
+  
   const gs = document.getElementById("screen-game");
   gs.style.filter = "none";
   gs.classList.remove("glitch-mode");
@@ -899,6 +991,7 @@ function loadScene(sceneName) {
     case "start":
       document.getElementById("screen-game").style.backgroundImage = "url('bg1.jpeg')";
       switchMusic(bgm2, "KeraiWalk");
+      unlockMusic("bgm2");
       typeWriter(`哦吼吼，逼然不美吗？你无法认识到它的美~让我给你介绍吧！\n\n末世来临，${pName}，选择你的酒店。`, storyText, () => {
         renderChoices();
       });
@@ -940,33 +1033,146 @@ function loadScene(sceneName) {
     case "restaurant_inside":
       document.getElementById("screen-game").style.backgroundImage = "url('bg4.jpg')";
       switchMusic(bgm2, "KeraiWalk");
-      typeWriter("额。。。店内一个人也没有啊。。。\n好饿呀！！！！！要不要吃点什么呢？", storyText, () => {
+      
+      if (progress.angeredSixin) {
+        if (progress.hitCount >= 5) {
+          showCharacterSprite("sixin2.png");
+          typeWriter("喵~傻逼~喵~你还敢回来？！！！", storyText, () => {
+            setTimeout(() => {
+              charSprite.classList.add('sprint');
+              document.getElementById("red-screen").classList.add("active");
+              document.querySelector(".game-wrap").classList.add("shaking");
+              
+              playSfx(sfxAlert);
+
+              typeWriter("丝莘以极快的速度向你冲刺过来！", storyText, () => {
+                setTimeout(() => {
+                  document.getElementById("dark-screen").classList.add("active");
+                  unlockAchievement("hidden1");
+                  setTimeout(() => {
+                    document.getElementById("ending-title").textContent = "💥 女莘力量！！";
+                    document.getElementById("ending-desc").innerHTML = '解锁Hidden Ending1：<span class="gold-text">女莘力量！！</span>';
+                    document.getElementById("ending-modal").classList.add("active");
+                  }, 1500);
+                }, 1000);
+              });
+            }, 1000);
+          });
+          break; 
+        }
+
+        showCharacterSprite("sixin2.png");
+        typeWriter("喵~傻逼~喵~你还敢回来？！", storyText, () => {
+          document.getElementById("red-screen").classList.add("active");
+          document.querySelector(".game-wrap").classList.add("shaking");
+          
+          playSfx(sfxAlert);
+
+          setTimeout(() => {
+            typeWriter("丝莘红温了！她再次把你暴打一顿并赶出了店铺！", storyText, () => {
+              progress.hitCount++; 
+              setTimeout(() => {
+                loadScene("restaurant_normal");
+              }, 2000);
+            });
+          }, 1000);
+        });
+      } else {
+        typeWriter("额。。。店内一个人也没有啊。。。\n好饿呀！！！！！要不要吃点什么呢？", storyText, () => {
+          const btn1 = document.createElement("button");
+          btn1.className = "story-btn";
+          btn1.textContent = "选项1：好！我吃！";
+          btn1.onclick = () => {
+            storyChoices.innerHTML = "";
+            loadScene("cat_sixin");
+          };
+          
+          const btn2 = document.createElement("button");
+          btn2.className = "story-btn";
+          btn2.textContent = "选项2：算了，看起来要倒闭了的样子，还是走吧。";
+          btn2.onclick = () => {
+            storyChoices.innerHTML = "";
+            // 【修改点】修改文本为（走了走了）
+            typeWriter("（走了走了）", storyText, () => {
+              setTimeout(() => loadScene("dog_encounter"), 2000); 
+            });
+          };
+          
+          storyChoices.appendChild(btn1);
+          storyChoices.appendChild(btn2);
+        });
+      }
+      break;
+
+    case "cat_sixin":
+      document.getElementById("screen-game").style.backgroundImage = "url('bg4.jpg')";
+      showCharacterSprite("sixin2.png");
+      switchMusic(bgm2, "KeraiWalk");
+      
+      typeWriter("喵~傻逼~喵~客官想吃点什么喵~", storyText, () => {
         const btn1 = document.createElement("button");
         btn1.className = "story-btn";
-        btn1.textContent = "选项1：好！我吃！";
+        btn1.textContent = "选项1：卧槽尼玛！这是啥东西？？？快逃吧！";
         btn1.onclick = () => {
           storyChoices.innerHTML = "";
-          typeWriter("你走向了空无一人的点餐台……\n\n（后续剧情待开发中）", storyText, () => {});
+          // 【修改点】修改文本为（走了走了）
+          typeWriter("喵~傻逼~喵~\n\n（走了走了）", storyText, () => {
+            setTimeout(() => loadScene("dog_encounter"), 2000);
+          });
         };
-        
+
         const btn2 = document.createElement("button");
         btn2.className = "story-btn";
-        btn2.textContent = "选项2：算了，看起来要倒闭了的样子，还是走吧。";
+        btn2.textContent = "选项2：不管了我好饿啊。";
         btn2.onclick = () => {
           storyChoices.innerHTML = "";
-          loadScene("dog_encounter"); 
+          typeWriter(`卧槽饿死了有什么吃的？？？\n\n喵~傻逼~喵~${pName}这里只有招牌菜炸炸炸猪了，你来魑魅吧。`, storyText, () => {
+            showLeftCharSprite("zzzz.jpg");
+            
+            setTimeout(() => {
+              typeWriter("（丝莘转身走向了后厨，去准备传说中的招牌菜了……）", storyText, () => {
+                setTimeout(() => {
+                  storyText.innerHTML += `<br><br>你陷入了漫长的等待……`;
+                }, 1500);
+              });
+            }, 1500);
+          });
+        };
+
+        const btn3 = document.createElement("button");
+        btn3.className = "story-btn";
+        btn3.textContent = "选项3：这猫好美呀。我好爱她。我要和她爱爱！！";
+        btn3.onclick = () => {
+          storyChoices.innerHTML = "";
+          typeWriter("你对丝莘说：“I Love You”\n\n喵~傻逼~喵~你个傻逼", storyText, () => {
+            document.getElementById("red-screen").classList.add("active");
+            document.querySelector(".game-wrap").classList.add("shaking");
+            
+            playSfx(sfxAlert);
+
+            setTimeout(() => {
+              typeWriter("丝莘红温了！她把你暴打一顿并赶出了店铺！", storyText, () => {
+                progress.hitCount++; 
+                setTimeout(() => {
+                  progress.angeredSixin = true; 
+                  loadScene("restaurant_normal");
+                }, 2000);
+              });
+            }, 1000);
+          });
         };
         
         storyChoices.appendChild(btn1);
         storyChoices.appendChild(btn2);
+        storyChoices.appendChild(btn3);
       });
       break;
 
     case "dog_encounter":
       document.getElementById("screen-game").style.backgroundImage = "url('bg.jpg')";
       showSceneImage("dog.png"); 
-      // 【修改点】遇到狗时播放 bgm3
       switchMusic(bgm3, "迷你世界里摘录的音乐");
+      unlockMusic("bgm3"); 
       typeWriter("转身却遇到了一只狗？卧槽她要扑上来了！！！\n\n补好，是否要逃走？", storyText, () => {
         const btn1 = document.createElement("button");
         btn1.className = "story-btn";
@@ -1017,11 +1223,14 @@ function loadScene(sceneName) {
 
       const gsGlitch = document.getElementById("screen-game");
       gsGlitch.classList.add("glitch-mode");
+      
+      glitchBgContainer.style.display = "block";
       let toggle = false;
       glitchInterval = setInterval(() => {
-        gsGlitch.style.backgroundImage = toggle ? "url('bg2.png')" : "url('bg3.png')";
+        glitchBgContainer.style.backgroundImage = toggle ? "url('bg2.png')" : "url('bg3.png')";
         toggle = !toggle;
       }, 100);
+      
       typeWriter("你来到了？？？？。", storyText, () => {});
       break;
 
@@ -1032,7 +1241,9 @@ function loadScene(sceneName) {
         const btn = document.createElement("button");
         btn.className = "story-btn";
         btn.textContent = "重新选择";
-        btn.onclick = () => loadScene("start");
+        btn.onclick = () => {
+          loadScene("start");
+        }
         storyChoices.appendChild(btn);
       });
       break;
@@ -1089,7 +1300,7 @@ function chooseStay() {
 }
 
 function chooseRestaurant() {
-  if (Math.random() < 0.5) {
+  if (Math.random() < 0.9) {
     loadScene("restaurant_normal");
   } else {
     loadScene("restaurant_glitch");
@@ -1126,7 +1337,7 @@ $$(".menu-btn").forEach(btn => {
         return;
       }
       
-      progress = { v: 1, scene: "start", playerName: nameInput, achievements: [] };
+      progress = { v: 1, scene: "start", playerName: nameInput, achievements: [], music: unlockedMusic, angeredSixin: false, hitCount: 0 };
       unlockAchievement("ach1");
       showScreen("game");
       loadScene("start");
@@ -1142,6 +1353,10 @@ $$(".menu-btn").forEach(btn => {
       renderAchievements(); 
       openModal("modal-achieve");
     }
+    if (action === "music-room"){
+      renderMusicRoom();
+      openModal("modal-music");
+    }
     if (action === "reset"){
       openModal("modal-reset"); 
     }
@@ -1150,9 +1365,7 @@ $$(".menu-btn").forEach(btn => {
 });
 
 document.getElementById("player-name").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    document.querySelector("[data-action='start']").click();
-  }
+  if (e.key === "Enter") document.querySelector("[data-action='start']").click();
 });
 
 $("#btn-back").addEventListener("click", backToTitle);
@@ -1164,10 +1377,13 @@ $("#btn-save-game").addEventListener("click", () => {
 
 $("#btn-confirm-reset").addEventListener("click", () => {
   localStorage.removeItem("xbcb_achievements");
+  localStorage.removeItem("xbcb_music");
   ACHIEVEMENTS.forEach(ach => ach.unlocked = false);
-  progress = { v: 1, scene: "start", playerName: "", achievements: [] };
+  unlockedMusic = [];
+  progress = { v: 1, scene: "start", playerName: "", achievements: [], music: [], angeredSixin: false, hitCount: 0 };
   document.getElementById("player-name").value = "";
   renderAchievements();
+  renderMusicRoom();
   resetGameUI();
   showScreen("title");
   showToast("游戏数据已初始化");
@@ -1177,13 +1393,17 @@ $("#btn-confirm-reset").addEventListener("click", () => {
 $("#btn-confirm-quit").addEventListener("click", () => {
   window.close(); closeModal(); $("#farewell").classList.add("show");
 });
-$("#btn-farewell-back").addEventListener("click", () => {
+$("#farewell-back").addEventListener("click", () => {
   $("#farewell").classList.remove("show"); backToTitle();
 });
 
 loadAchievementsFromStorage();
+loadMusicFromStorage();
 renderAchievements();
-musicTitle.textContent = "莘逼晨晨Book ~ We＆炸炸炸猪";
+renderMusicRoom();
+
+unlockMusic("bgm1");
+musicTitle.textContent = "莘逼晨成Book ~ We＆炸炸炸猪";
 </script>
 </body>
 </html>
