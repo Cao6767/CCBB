@@ -36,259 +36,157 @@
   .screen.active{display:flex; animation:fade .5s ease both;}
   @keyframes fade{from{opacity:0;} to{opacity:1;}}
 
-  /* ============ 标题画面（加入背景图） ============ */
-  #screen-title {
-    overflow: hidden;
-    background: #000;
-  }
-
-  /* 背景图容器 */
+  /* ============ 标题画面背景 ============ */
+  #screen-title { overflow: hidden; background: #000; }
   .bg-container {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
+    position: absolute; inset: 0; z-index: 0; overflow: hidden;
   }
-
-  /* 背景图本体 */
   .bg-image {
-    position: absolute;
-    left: 0;
-    top: 50%; /* 垂直居中 */
-    transform: translateY(-50%); /* 垂直居中 */
-    will-change: transform;
-    pointer-events: none;
+    position: absolute; left: 0; top: 50%;
+    transform: translateY(-50%);
+    will-change: transform; pointer-events: none;
   }
-
-  /* 径向渐变遮罩，让背景变暗，突出中间的文字 */
   .bg-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
+    position: absolute; inset: 0; z-index: 1;
     background: radial-gradient(circle at center, rgba(6, 7, 11, 0.45) 0%, rgba(6, 7, 11, 0.85) 100%);
     pointer-events: none;
   }
 
-  /* 标题内容层（叠在背景之上） */
+  /* 标题内容层 */
   .title-content {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column;
+    align-items: center; width: 100%;
   }
-
   .title-wrap{text-align:center; margin-bottom:40px;}
-  .subtitle{
-    margin:0 0 20px; min-height:1em;
-    font-size:11px; letter-spacing:.5em; text-indent:.5em;
-    color:var(--dim);
-  }
+  .subtitle{margin:0 0 20px; min-height:1em; font-size:11px; letter-spacing:.5em; text-indent:.5em; color:var(--dim);}
   .game-title{
-    margin:0;
-    font-size:clamp(26px, 7.5vw, 50px);
-    font-weight:400;
-    letter-spacing:.12em; text-indent:.12em;
-    color:#e8dcc0;
-    text-shadow:0 0 30px rgba(217,164,65,.35);
-    animation:breathe 5s ease-in-out infinite;
-    word-break:keep-all;
+    margin:0; font-size:clamp(26px, 7.5vw, 50px);
+    font-weight:400; letter-spacing:.12em; text-indent:.12em;
+    color:#e8dcc0; text-shadow:0 0 30px rgba(217,164,65,.35);
+    animation:breathe 5s ease-in-out infinite; word-break:keep-all;
   }
-  @keyframes breathe{
-    50%{text-shadow:0 0 48px rgba(217,164,65,.62);}
-  }
-  .tagline{
-    margin:18px 0 0; min-height:1em;
-    font-size:13px; letter-spacing:.4em; text-indent:.4em;
-    color:var(--dim);
-  }
+  @keyframes breathe{50%{text-shadow:0 0 48px rgba(217,164,65,.62);}}
+  .tagline{margin:18px 0 0; min-height:1em; font-size:13px; letter-spacing:.4em; text-indent:.4em; color:var(--dim);}
 
-  .menu{
-    display:flex; flex-direction:column; gap:12px;
-    width:min(320px, 84vw);
-  }
+  .menu{display:flex; flex-direction:column; gap:12px; width:min(320px, 84vw);}
   .menu-btn{
-    position:relative;
-    width:100%;
-    padding:15px 20px;
-    background:rgba(6,7,11,.6);
-    border:1px solid var(--line);
-    border-radius:8px;
-    color:var(--text);
-    font:inherit;
-    font-size:16px;
-    letter-spacing:.18em; text-indent:.18em;
-    cursor:pointer;
-    backdrop-filter: blur(4px);
+    position:relative; width:100%; padding:15px 20px;
+    background:rgba(6,7,11,.6); border:1px solid var(--line);
+    border-radius:8px; color:var(--text); font:inherit;
+    font-size:16px; letter-spacing:.18em; text-indent:.18em;
+    cursor:pointer; backdrop-filter: blur(4px);
     transition:background .22s, border-color .22s, color .22s, transform .22s;
   }
   .menu-btn::before{
-    content:"";
-    position:absolute; left:0; top:50%;
-    width:2px; height:0;
-    background:var(--gold);
-    transform:translateY(-50%);
-    transition:height .26s ease;
+    content:""; position:absolute; left:0; top:50%;
+    width:2px; height:0; background:var(--gold);
+    transform:translateY(-50%); transition:height .26s ease;
   }
   .menu-btn:hover{
-    background:rgba(217,164,65,.15);
-    border-color:rgba(217,164,65,.45);
-    color:#f2e8d2;
-    transform:translateX(3px);
+    background:rgba(217,164,65,.15); border-color:rgba(217,164,65,.45);
+    color:#f2e8d2; transform:translateX(3px);
   }
   .menu-btn:hover::before{height:60%;}
   .menu-btn:active{transform:translateX(1px) scale(.995);}
 
   .foot{
     position:absolute; bottom:22px; left:0; right:0;
-    text-align:center;
-    font-size:11px; letter-spacing:.22em;
-    color:rgba(111,120,137,.6);
-    z-index: 2;
+    text-align:center; font-size:11px; letter-spacing:.22em;
+    color:rgba(111,120,137,.6); z-index: 2;
+  }
+
+  /* ============ 音乐播放器 UI ============ */
+  .music-player {
+    position: fixed;
+    top: 20px; right: 20px;
+    z-index: 100;
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 16px 6px 6px;
+    background: rgba(6, 7, 11, 0.65);
+    border: 1px solid var(--line);
+    border-radius: 40px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    cursor: pointer;
+  }
+  .music-player:hover { border-color: rgba(217,164,65,0.4); background: rgba(6, 7, 11, 0.85); }
+  .music-player.playing { border-color: rgba(217,164,65,0.5); }
+  
+  .music-btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(217,164,65,0.15); border: 1px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; transition: all 0.3s;
+  }
+  .music-player.playing .music-btn {
+    animation: spin 4s linear infinite;
+    background: var(--gold); color: #000;
+  }
+  @keyframes spin { 100% { transform: rotate(360deg); } }
+
+  .music-title {
+    font-size: 12px; letter-spacing: 0.05em; color: var(--text);
+    max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-family: sans-serif;
+  }
+  .music-player.playing .music-title { color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.3); }
+  
+  @media (max-width: 600px) {
+    .music-title { max-width: 130px; font-size: 11px; }
   }
 
   /* ============ 游戏画面（占位） ============ */
   #screen-game{justify-content:flex-start; padding:0;}
-  .game-wrap{
-    width:100%; max-width:720px; height:100%;
-    padding:20px 22px;
-    display:flex; flex-direction:column; gap:22px;
-  }
-  .game-head{
-    display:flex; justify-content:space-between; align-items:center;
-    gap:12px; padding-bottom:14px;
-    border-bottom:1px solid var(--line);
-  }
+  .game-wrap{width:100%; max-width:720px; height:100%; padding:20px 22px; display:flex; flex-direction:column; gap:22px;}
+  .game-head{display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:14px; border-bottom:1px solid var(--line);}
   .chapter{font-size:13px; letter-spacing:.22em; color:var(--gold); opacity:.8;}
-  .game-body{
-    flex:1; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:12px; text-align:center;
-  }
+  .game-body{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center;}
   .placeholder{font-size:16px; letter-spacing:.08em; margin:0;}
   .placeholder.dim{font-size:13px; color:var(--dim);}
 
   /* ============ 通用按钮 ============ */
-  .ghost-btn{
-    padding:8px 14px;
-    background:transparent;
-    border:1px solid var(--line);
-    border-radius:6px;
-    color:var(--dim);
-    font:inherit; font-size:13px; letter-spacing:.1em;
-    cursor:pointer; transition:.2s;
-  }
-  .ghost-btn:hover{
-    color:var(--gold);
-    border-color:rgba(217,164,65,.45);
-    background:rgba(217,164,65,.06);
-  }
-  .primary-btn{
-    width:100%; padding:13px; border-radius:8px;
-    border:1px solid rgba(217,164,65,.45);
-    background:rgba(217,164,65,.12);
-    color:#f0e2c4;
-    font:inherit; font-size:15px; letter-spacing:.14em;
-    cursor:pointer; transition:.2s;
-  }
-  .primary-btn:hover{
-    background:rgba(217,164,65,.22);
-    border-color:var(--gold);
-  }
+  .ghost-btn{padding:8px 14px; background:transparent; border:1px solid var(--line); border-radius:6px; color:var(--dim); font:inherit; font-size:13px; letter-spacing:.1em; cursor:pointer; transition:.2s;}
+  .ghost-btn:hover{color:var(--gold); border-color:rgba(217,164,65,.45); background:rgba(217,164,65,.06);}
+  .primary-btn{width:100%; padding:13px; border-radius:8px; border:1px solid rgba(217,164,65,.45); background:rgba(217,164,65,.12); color:#f0e2c4; font:inherit; font-size:15px; letter-spacing:.14em; cursor:pointer; transition:.2s;}
+  .primary-btn:hover{background:rgba(217,164,65,.22); border-color:var(--gold);}
   .primary-btn:active{transform:scale(.995);}
 
   /* ============ 弹窗 ============ */
-  .modal-layer{
-    position:fixed; inset:0; z-index:50;
-    display:none; align-items:center; justify-content:center;
-    padding:20px;
-    background:rgba(4,6,10,.78);
-    backdrop-filter:blur(6px);
-    -webkit-backdrop-filter:blur(6px);
-  }
+  .modal-layer{position:fixed; inset:0; z-index:50; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(4,6,10,.78); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);}
   .modal-layer.open{display:flex; animation:fade .25s ease both;}
-  .modal{
-    display:none; width:100%; max-width:520px;
-    max-height:84vh; overflow-y:auto;
-    padding:24px; border-radius:14px;
-    border:1px solid rgba(217,164,65,.22);
-    background:linear-gradient(180deg, #121724 0%, #0c1019 100%);
-    box-shadow:0 26px 70px rgba(0,0,0,.65);
-    animation:pop .28s cubic-bezier(.2,.9,.3,1.2) both;
-  }
+  .modal{display:none; width:100%; max-width:520px; max-height:84vh; overflow-y:auto; padding:24px; border-radius:14px; border:1px solid rgba(217,164,65,.22); background:linear-gradient(180deg, #121724 0%, #0c1019 100%); box-shadow:0 26px 70px rgba(0,0,0,.65); animation:pop .28s cubic-bezier(.2,.9,.3,1.2) both;}
   .modal.active{display:block;}
-  @keyframes pop{
-    from{opacity:0; transform:translateY(10px) scale(.98);}
-    to{opacity:1; transform:none;}
-  }
+  @keyframes pop{from{opacity:0; transform:translateY(10px) scale(.98);} to{opacity:1; transform:none;}}
   .modal::-webkit-scrollbar{width:6px;}
   .modal::-webkit-scrollbar-thumb{background:#2a3244; border-radius:3px;}
 
-  .modal-head{
-    display:flex; justify-content:space-between; align-items:center;
-    margin-bottom:18px;
-  }
-  .modal-head h2{
-    margin:0; font-size:17px; font-weight:400;
-    letter-spacing:.24em; text-indent:.24em; color:var(--gold);
-  }
-  .close-btn{
-    width:30px; height:30px; display:grid; place-items:center;
-    background:transparent; border:1px solid var(--line);
-    border-radius:6px; color:var(--dim); font-size:13px;
-    cursor:pointer; transition:.2s;
-  }
+  .modal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+  .modal-head h2{margin:0; font-size:17px; font-weight:400; letter-spacing:.24em; text-indent:.24em; color:var(--gold);}
+  .close-btn{width:30px; height:30px; display:grid; place-items:center; background:transparent; border:1px solid var(--line); border-radius:6px; color:var(--dim); font-size:13px; cursor:pointer; transition:.2s;}
   .close-btn:hover{color:#fff; border-color:rgba(255,255,255,.3);}
 
-  .tabs{
-    display:flex; gap:6px; margin-bottom:18px;
-    border-bottom:1px solid var(--line);
-  }
-  .tab{
-    padding:9px 14px; background:transparent; border:none;
-    border-bottom:2px solid transparent; color:var(--dim);
-    font:inherit; font-size:14px; letter-spacing:.1em;
-    cursor:pointer; transition:.2s;
-  }
+  .tabs{display:flex; gap:6px; margin-bottom:18px; border-bottom:1px solid var(--line);}
+  .tab{padding:9px 14px; background:transparent; border:none; border-bottom:2px solid transparent; color:var(--dim); font:inherit; font-size:14px; letter-spacing:.1em; cursor:pointer; transition:.2s;}
   .tab:hover{color:var(--text);}
   .tab.active{color:var(--gold); border-bottom-color:var(--gold);}
   .tab-panel{display:none; flex-direction:column; gap:12px;}
   .tab-panel.active{display:flex;}
 
-  .hint{
-    margin:0; font-size:12.5px; line-height:1.8;
-    color:var(--dim); letter-spacing:.05em;
-  }
-  .err{
-    margin:0; min-height:16px; font-size:12.5px;
-    color:#d9736b; letter-spacing:.05em;
-  }
-  textarea{
-    width:100%; padding:12px; border-radius:8px;
-    border:1px solid var(--line); background:rgba(0,0,0,.36);
-    color:var(--text); font-family:ui-monospace, Menlo, Consolas, monospace;
-    font-size:12.5px; line-height:1.7; resize:vertical; outline:none;
-    transition:border-color .2s; word-break:break-all;
-  }
+  .hint{margin:0; font-size:12.5px; line-height:1.8; color:var(--dim); letter-spacing:.05em;}
+  .err{margin:0; min-height:16px; font-size:12.5px; color:#d9736b; letter-spacing:.05em;}
+  textarea{width:100%; padding:12px; border-radius:8px; border:1px solid var(--line); background:rgba(0,0,0,.36); color:var(--text); font-family:ui-monospace, Menlo, Consolas, monospace; font-size:12.5px; line-height:1.7; resize:vertical; outline:none; transition:border-color .2s; word-break:break-all;}
   textarea:focus{border-color:rgba(217,164,65,.5);}
   textarea::placeholder{color:rgba(111,120,137,.7);}
 
   /* CG 画廊 */
   .cg-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;}
-  .cg-item{
-    position:relative; aspect-ratio:16/10;
-    display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:5px;
-    border-radius:8px; border:1px solid var(--line);
-    background:rgba(255,255,255,.02); font-size:11px;
-    letter-spacing:.1em; color:var(--dim); overflow:hidden; transition:.25s;
-  }
+  .cg-item{position:relative; aspect-ratio:16/10; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; border-radius:8px; border:1px solid var(--line); background:rgba(255,255,255,.02); font-size:11px; letter-spacing:.1em; color:var(--dim); overflow:hidden; transition:.25s;}
   .cg-item .lock{font-size:15px; opacity:.5;}
   .cg-item.locked:hover{border-color:rgba(255,255,255,.16);}
-  .cg-item.unlocked{
-    background:linear-gradient(135deg, #1c2740 0%, #0e1524 100%);
-    border-color:rgba(217,164,65,.3); color:#e0d5ba; cursor:pointer;
-  }
+  .cg-item.unlocked{background:linear-gradient(135deg, #1c2740 0%, #0e1524 100%); border-color:rgba(217,164,65,.3); color:#e0d5ba; cursor:pointer;}
   .cg-item.unlocked:hover{border-color:var(--gold); transform:translateY(-2px);}
   .cg-empty{grid-column:1/-1; padding:26px 0; text-align:center;}
 
@@ -298,12 +196,7 @@
   }
 
   /* 告别画面 */
-  .farewell{
-    position:fixed; inset:0; z-index:100;
-    display:none; flex-direction:column;
-    align-items:center; justify-content:center;
-    gap:16px; text-align:center; background:#04050a;
-  }
+  .farewell{position:fixed; inset:0; z-index:100; display:none; flex-direction:column; align-items:center; justify-content:center; gap:16px; text-align:center; background:#04050a;}
   .farewell.show{display:flex; animation:fade 1s ease both;}
   .farewell p{margin:0; letter-spacing:.3em; text-indent:.3em;}
   .farewell p.main{font-size:18px; color:#e8dcc0;}
@@ -312,14 +205,20 @@
 </head>
 <body>
 
+<!-- ==================== 音乐播放器 ==================== -->
+<!-- 修改了这里的 src，指向你的 bgm1.mp3 -->
+<audio id="bgm" src="bgm1.mp3" loop></audio>
+<div id="music-player" class="music-player" title="点击播放/暂停">
+  <div class="music-btn" id="music-icon">▶</div>
+  <!-- 页面显示的歌曲名，你可以随意改这里的文字，不影响音乐加载 -->
+  <div class="music-title">莘逼晨晨Book ~ We＆炸炸炸猪</div>
+</div>
+
 <!-- ==================== 标题画面 ==================== -->
 <main id="screen-title" class="screen active">
-  
   <div class="bg-container">
-    <!-- 确保图片命名为 bg.jpg 且和 HTML 同级 -->
     <img src="bg.jpg" id="title-bg" class="bg-image" alt="背景图">
   </div>
-  
   <div class="bg-overlay"></div>
 
   <div class="title-content">
@@ -328,7 +227,6 @@
       <h1 class="game-title">莘逼晨成Book</h1>
       <p class="tagline"></p>
     </div>
-
     <nav class="menu">
       <button class="menu-btn" data-action="start">开始游戏</button>
       <button class="menu-btn" data-action="save">读取存档</button>
@@ -336,7 +234,6 @@
       <button class="menu-btn" data-action="quit">退出游戏</button>
     </nav>
   </div>
-
   <footer class="foot">v0.1</footer>
 </main>
 
@@ -358,10 +255,7 @@
 <!-- ==================== 弹窗层 ==================== -->
 <div id="modal-layer" class="modal-layer">
   <div class="modal" id="modal-save">
-    <div class="modal-head">
-      <h2>存 档</h2>
-      <button class="close-btn" data-close>✕</button>
-    </div>
+    <div class="modal-head"><h2>存 档</h2><button class="close-btn" data-close>✕</button></div>
     <div class="tabs">
       <button class="tab active" data-tab="tab-load">读取存档</button>
       <button class="tab" data-tab="tab-gen">生成存档码</button>
@@ -380,19 +274,13 @@
   </div>
 
   <div class="modal" id="modal-cg">
-    <div class="modal-head">
-      <h2>游 戏 C G</h2>
-      <button class="close-btn" data-close>✕</button>
-    </div>
+    <div class="modal-head"><h2>游 戏 C G</h2><button class="close-btn" data-close>✕</button></div>
     <p class="hint" style="margin-bottom:14px;">随着剧情推进，会逐步解锁新的画面。</p>
     <div class="cg-grid" id="cg-grid"></div>
   </div>
 
   <div class="modal" id="modal-quit">
-    <div class="modal-head">
-      <h2>退 出 游 戏</h2>
-      <button class="close-btn" data-close>✕</button>
-    </div>
+    <div class="modal-head"><h2>退 出 游 戏</h2><button class="close-btn" data-close>✕</button></div>
     <p class="hint" style="margin-bottom:20px;">确定要退出吗？<br>未保存的进度将会丢失。</p>
     <div style="display:flex; gap:10px;">
       <button class="ghost-btn" style="flex:1; padding:13px;" data-close>继续游戏</button>
@@ -410,7 +298,35 @@
 
 <script>
 /* =========================================================
-   1. 背景图正弦平移逻辑（核心修复）
+   1. 音乐播放逻辑
+   ========================================================= */
+const bgm = document.getElementById('bgm');
+const musicPlayer = document.getElementById('music-player');
+const musicIcon = document.getElementById('music-icon');
+
+function toggleMusic() {
+  if (bgm.paused) {
+    bgm.play().catch(e => console.log("浏览器拦截了自动播放，需要用户点击触发。"));
+  } else {
+    bgm.pause();
+  }
+}
+
+musicPlayer.addEventListener('click', toggleMusic);
+
+bgm.addEventListener('play', () => {
+  musicPlayer.classList.add('playing');
+  musicIcon.textContent = '💿'; 
+});
+
+bgm.addEventListener('pause', () => {
+  musicPlayer.classList.remove('playing');
+  musicIcon.textContent = '▶'; 
+});
+
+
+/* =========================================================
+   2. 背景图正弦平移逻辑
    ========================================================= */
 const bgImage = document.getElementById('title-bg');
 let imgWidth = 0;
@@ -418,69 +334,42 @@ let maxOffset = 0;
 
 function calculateBg() {
   if (!bgImage.complete || bgImage.naturalWidth === 0) return;
-  
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  
-  // 第一步：先让图片高度撑满屏幕
   bgImage.style.height = vh + 'px';
   bgImage.style.width = 'auto';
-  
   let currentWidth = bgImage.getBoundingClientRect().width;
   
-  // 第二步：如果是宽屏，图片可能刚好塞满屏幕没法动。
-  // 我们强制把它放大 1.3 倍，制造出左右移动的空间。
   if (currentWidth < vw + 50) { 
     bgImage.style.width = (vw * 1.3) + 'px';
     bgImage.style.height = 'auto';
-    
-    // 放大宽度后，如果高度变小了，再撑满高度
     if (bgImage.getBoundingClientRect().height < vh) {
       bgImage.style.height = vh + 'px';
       bgImage.style.width = 'auto';
     }
   }
-  
-  // 重新计算最终的宽度和最大偏移量
   imgWidth = bgImage.getBoundingClientRect().width;
   maxOffset = Math.max(0, imgWidth - vw);
 }
 
-// 监听加载
-if (bgImage.complete) {
-  calculateBg();
-} else {
-  bgImage.addEventListener('load', calculateBg);
-}
+if (bgImage.complete) { calculateBg(); } else { bgImage.addEventListener('load', calculateBg); }
 window.addEventListener('resize', calculateBg);
 
-// 正弦移动动画
 let startTime = null;
 function animateBg(timestamp) {
   if (!startTime) startTime = timestamp;
   const elapsed = timestamp - startTime;
-  
-  // 周期 24 秒（24000 毫秒）
-  const period = 24000; 
+  const period = 24000; // 24秒一圈
   const angle = (elapsed / period) * Math.PI * 2;
-  
-  // 正弦映射：sin 的值在 -1 到 1 之间
-  // (Math.sin(angle) + 1) / 2 将其映射到 0 到 1 之间
-  // 乘以 maxOffset 得到最终偏移量
   const offset = - (Math.sin(angle) + 1) / 2 * maxOffset;
-  
-  // 保留垂直居中（translateY），加上水平移动（translateX）
   bgImage.style.transform = `translateY(-50%) translateX(${offset}px)`;
-  
   requestAnimationFrame(animateBg);
 }
-// 启动动画
 requestAnimationFrame(animateBg);
 
 
-
 /* =========================================================
-   以下为 UI 逻辑（保持原样）
+   3. UI 逻辑
    ========================================================= */
 const CG_LIST = [];
 function newProgress(){ return { v: 1, scene: "start" }; }
@@ -574,6 +463,10 @@ $("#btn-load").addEventListener("click", () => {
 function enterGame(statusText){
   showScreen("game");
   gameStatus.textContent = statusText || "下一步将接入文字显示与选项分支。";
+  
+  if (bgm.paused) {
+    bgm.play().catch(() => { /* 如果浏览器拦截，就等用户点右上角 */ });
+  }
 }
 
 $$(".menu-btn").forEach(btn => {
