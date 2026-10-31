@@ -48,18 +48,14 @@
     inset: 0;
     z-index: 0;
     overflow: hidden;
-    display: flex;
-    align-items: center;
   }
 
   /* 背景图本体 */
   .bg-image {
     position: absolute;
     left: 0;
-    height: 100%;
-    max-width: none; /* 防止被压缩 */
-    min-width: 100%;
-    object-fit: cover;
+    top: 50%; /* 垂直居中 */
+    transform: translateY(-50%); /* 垂直居中 */
     will-change: transform;
     pointer-events: none;
   }
@@ -116,7 +112,7 @@
     position:relative;
     width:100%;
     padding:15px 20px;
-    background:rgba(6,7,11,.6); /* 加深按钮底色，防止和背景文字混在一起 */
+    background:rgba(6,7,11,.6);
     border:1px solid var(--line);
     border-radius:8px;
     color:var(--text);
@@ -319,15 +315,13 @@
 <!-- ==================== 标题画面 ==================== -->
 <main id="screen-title" class="screen active">
   
-  <!-- 背景图容器 -->
   <div class="bg-container">
-    <!-- 请确保你的图片命名为 bg.jpg 并且放在同级目录 -->
+    <!-- 确保图片命名为 bg.jpg 且和 HTML 同级 -->
     <img src="bg.jpg" id="title-bg" class="bg-image" alt="背景图">
   </div>
-  <!-- 渐变遮罩层 -->
+  
   <div class="bg-overlay"></div>
 
-  <!-- 内容层 -->
   <div class="title-content">
     <div class="title-wrap">
       <p class="subtitle"></p>
@@ -416,36 +410,43 @@
 
 <script>
 /* =========================================================
-   0. 内容配置区
-   ========================================================= */
-const CG_LIST = [];
-function newProgress(){ return { v: 1, scene: "start" }; }
-
-
-/* =========================================================
-   1. 背景图正弦平移逻辑
+   1. 背景图正弦平移逻辑（核心修复）
    ========================================================= */
 const bgImage = document.getElementById('title-bg');
 let imgWidth = 0;
-let viewportWidth = 0;
 let maxOffset = 0;
 
-// 计算图片和视口的宽度
 function calculateBg() {
-  if (!bgImage.complete) return;
-  viewportWidth = window.innerWidth;
+  if (!bgImage.complete || bgImage.naturalWidth === 0) return;
   
-  // 强制图片高度撑满屏幕，宽度按比例自适应
-  bgImage.style.height = window.innerHeight + 'px';
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  
+  // 第一步：先让图片高度撑满屏幕
+  bgImage.style.height = vh + 'px';
   bgImage.style.width = 'auto';
   
-  imgWidth = bgImage.getBoundingClientRect().width;
+  let currentWidth = bgImage.getBoundingClientRect().width;
   
-  // 如果图片比屏幕宽，计算最大平移距离
-  maxOffset = Math.max(0, imgWidth - viewportWidth);
+  // 第二步：如果是宽屏，图片可能刚好塞满屏幕没法动。
+  // 我们强制把它放大 1.3 倍，制造出左右移动的空间。
+  if (currentWidth < vw + 50) { 
+    bgImage.style.width = (vw * 1.3) + 'px';
+    bgImage.style.height = 'auto';
+    
+    // 放大宽度后，如果高度变小了，再撑满高度
+    if (bgImage.getBoundingClientRect().height < vh) {
+      bgImage.style.height = vh + 'px';
+      bgImage.style.width = 'auto';
+    }
+  }
+  
+  // 重新计算最终的宽度和最大偏移量
+  imgWidth = bgImage.getBoundingClientRect().width;
+  maxOffset = Math.max(0, imgWidth - vw);
 }
 
-// 监听图片加载完成（防止一开始图片没加载出来算错宽度）
+// 监听加载
 if (bgImage.complete) {
   calculateBg();
 } else {
@@ -459,17 +460,17 @@ function animateBg(timestamp) {
   if (!startTime) startTime = timestamp;
   const elapsed = timestamp - startTime;
   
-  // 周期设为 24秒 (24000ms)，意味着每24秒完成一次左右往返
+  // 周期 24 秒（24000 毫秒）
   const period = 24000; 
   const angle = (elapsed / period) * Math.PI * 2;
   
-  // Math.sin 的结果在 -1 到 1 之间
-  // 我们把它映射到 0 到 -maxOffset 之间
-  // 当 sin 为 -1 时，位置是 0（靠左）
-  // 当 sin 为 1 时，位置是 -maxOffset（靠右）
+  // 正弦映射：sin 的值在 -1 到 1 之间
+  // (Math.sin(angle) + 1) / 2 将其映射到 0 到 1 之间
+  // 乘以 maxOffset 得到最终偏移量
   const offset = - (Math.sin(angle) + 1) / 2 * maxOffset;
   
-  bgImage.style.transform = `translateX(${offset}px)`;
+  // 保留垂直居中（translateY），加上水平移动（translateX）
+  bgImage.style.transform = `translateY(-50%) translateX(${offset}px)`;
   
   requestAnimationFrame(animateBg);
 }
@@ -477,9 +478,13 @@ function animateBg(timestamp) {
 requestAnimationFrame(animateBg);
 
 
+
 /* =========================================================
-   以下为之前的 UI 逻辑（原封不动）
+   以下为 UI 逻辑（保持原样）
    ========================================================= */
+const CG_LIST = [];
+function newProgress(){ return { v: 1, scene: "start" }; }
+
 const $  = sel => document.querySelector(sel);
 const $$ = sel => Array.from(document.querySelectorAll(sel));
 
