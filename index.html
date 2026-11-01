@@ -22,6 +22,7 @@
     font-family:"Songti SC","STSong","SimSun","Noto Serif SC",serif;
     -webkit-font-smoothing:antialiased;
     background:var(--bg-0);
+    transition: background-color 0.1s;
   }
 
   /* ============ 屏幕通用 ============ */
@@ -57,7 +58,7 @@
     position: fixed; inset: 0; z-index: 85;
     background: radial-gradient(circle, rgba(255,0,0,0.3) 0%, rgba(255,0,0,0.8) 100%);
     opacity: 0; pointer-events: none;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.1s ease;
     mix-blend-mode: multiply;
   }
   .red-hot-overlay.active {
@@ -225,6 +226,13 @@
   }
   
   .game-head{ display:flex; justify-content:space-between; align-items:center; gap:12px; padding-bottom:14px; border-bottom:1px solid var(--line); }
+  .game-head-left { display: flex; align-items: center; gap: 15px; }
+  
+  #money-display {
+    font-size: 14px; color: var(--gold); font-weight: bold;
+    letter-spacing: 0.05em; text-shadow: 0 0 10px rgba(217,164,65,0.3);
+  }
+
   .game-body{ flex:1; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; padding-top:20px; text-align:left; overflow-y: auto; }
   .game-body::-webkit-scrollbar{width:6px;}
   .game-body::-webkit-scrollbar-thumb{background:#2a3244; border-radius:3px;}
@@ -255,8 +263,23 @@
   }
   .story-btn:hover { background: rgba(217,164,65,.15); border-color: rgba(217,164,65,.5); transform: translateX(4px); color: #fff; }
 
-  .screen-dark { position: fixed; inset: 0; z-index: 80; background: #000; opacity: 0; pointer-events: none; transition: opacity 2s ease; }
+  /* 红色诡异按钮 */
+  .story-btn.red-text {
+    color: #ff4d4d;
+    border-color: rgba(255, 77, 77, 0.4);
+    text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+  }
+  .story-btn.red-text:hover {
+    background: rgba(255, 77, 77, 0.15);
+    border-color: #ff4d4d;
+    color: #fff;
+  }
+
+  .screen-dark { position: fixed; inset: 0; z-index: 80; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
   .screen-dark.active { opacity: 1; pointer-events: auto; }
+  
+  /* 瞬间黑屏特效，去除过渡 */
+  .screen-dark.instant { transition: none !important; }
 
   .ending-modal {
     position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -424,7 +447,10 @@
 
   <div class="game-wrap">
     <header class="game-head">
-      <button class="ghost-btn" id="btn-back">← 返回标题</button>
+      <div class="game-head-left">
+        <button class="ghost-btn" id="btn-back">← 返回标题</button>
+        <span id="money-display">💰 0 元宝</span>
+      </div>
       <button class="ghost-btn" id="btn-save-game">存档</button>
     </header>
     
@@ -534,7 +560,6 @@ const MUSIC_LIST = [
   { id: "bgm3", name: "迷你世界里摘录的音乐", audio: bgm3 }
 ];
 
-// 【核心修复 1】直接暴力读取本地存储，不用任何花里胡哨的 try-catch
 let unlockedMusic = ["bgm1"];
 let savedMusic = localStorage.getItem("xbcb_music");
 if (savedMusic) {
@@ -548,14 +573,12 @@ if (savedMusic) {
   } catch(e) {}
 }
 
-// 初始化音量
 bgm1.volume = currentVolume;
 bgm2.volume = currentVolume;
 bgm3.volume = currentVolume;
 sfxAlert.volume = currentVolume;
 sfxAch.volume = currentVolume;
 
-// 通用播放音效函数
 function playSfx(audioObj) {
   if (!audioObj) return;
   audioObj.currentTime = 0;
@@ -600,7 +623,6 @@ volumeBtn.addEventListener('click', (e) => {
   updateVolumeIcon();
 });
 
-// 【核心修复 2】解锁并立即保存
 function unlockMusic(id) {
   if (!unlockedMusic.includes(id)) {
     unlockedMusic.push(id);
@@ -690,6 +712,7 @@ let ACHIEVEMENTS = [
   { id: "ach1", name: "欢迎光临莘莘之家！", unlocked: false, src: "bg.jpg" },
   { id: "ach2", name: "Bad Ending1：您是有多福大命大？？", unlocked: false, src: "bg1.jpeg" },
   { id: "ach3", name: "Bad Ending2：连只狗都打不过。", unlocked: false, src: "dog.png" },
+  { id: "ach4", name: "神通广大的逼莘", unlocked: false, src: "sixin2.png" },
   { id: "hidden1", name: "Hidden Ending1：女莘力量！！", unlocked: false, src: "sixin2.png", isHidden: true }
 ];
 
@@ -700,10 +723,12 @@ let progress = {
   achievements: [],
   music: [],
   angeredSixin: false,
-  hitCount: 0 
+  hitCount: 0,
+  money: 0,
+  freeMeal: false,
+  owedMoney: false
 };
 
-// 【核心修复 3】暴力读取并赋值成就
 let savedAch = localStorage.getItem("xbcb_achievements");
 if (savedAch) {
   try {
@@ -722,7 +747,6 @@ function unlockAchievement(id) {
     ach.unlocked = true;
     if (!progress.achievements.includes(id)) progress.achievements.push(id);
     
-    // 【核心修复 4】实时保存，绝不拖泥带水
     const unlockedIds = ACHIEVEMENTS.filter(a => a.unlocked).map(a => a.id);
     localStorage.setItem("xbcb_achievements", JSON.stringify(unlockedIds));
     
@@ -752,7 +776,6 @@ function renderAchievements() {
 }
 
 function renderMusicRoom() {
-  // 双重保险：绝对确保 bgm1 在
   if (!unlockedMusic.includes("bgm1")) unlockedMusic.push("bgm1");
   
   const listEl = $("#music-list");
@@ -774,6 +797,13 @@ function renderMusicRoom() {
     }
     listEl.appendChild(item);
   });
+}
+
+function updateMoney() {
+  const moneyEl = document.getElementById("money-display");
+  if (moneyEl) {
+    moneyEl.textContent = `💰 ${progress.money || 0} 元宝`;
+  }
 }
 
 
@@ -892,12 +922,14 @@ $("#btn-load").addEventListener("click", () => {
 
   progress = data;
   if (progress.hitCount === undefined) progress.hitCount = 0; 
+  if (progress.money === undefined) progress.money = 0;
+  if (progress.freeMeal === undefined) progress.freeMeal = false;
+  if (progress.owedMoney === undefined) progress.owedMoney = false;
   
   if (data.playerName) document.getElementById("player-name").value = data.playerName;
 
   if (data.achievements && Array.isArray(data.achievements)) {
     ACHIEVEMENTS.forEach(ach => { if (data.achievements.includes(ach.id)) ach.unlocked = true; });
-    // 立即同步到本地
     const unlockedIds = ACHIEVEMENTS.filter(a => a.unlocked).map(a => a.id);
     localStorage.setItem("xbcb_achievements", JSON.stringify(unlockedIds));
     renderAchievements();
@@ -941,6 +973,49 @@ function typeWriter(text, element, callback) {
   }, 60); 
 }
 
+function getGlitchText(text) {
+  const symbols = ['?', '？', '▓', '▒', '░', '█', '※', '×', '̵', '̷', '̸', '̡', '̢'];
+  let result = "";
+  for (let i = 0; i < text.length; i++) {
+    if (Math.random() < 0.3) {
+      result += symbols[Math.floor(Math.random() * symbols.length)];
+    } else {
+      result += text[i];
+      if (Math.random() < 0.2) {
+        result += symbols[Math.floor(Math.random() * symbols.length)];
+      }
+    }
+  }
+  return result;
+}
+
+function triggerGlitchFail() {
+  clearInterval(typingTimer);
+  storyChoices.innerHTML = "";
+  
+  if (window.glitchFlickerTimer) clearInterval(window.glitchFlickerTimer);
+  if (glitchInterval) clearInterval(glitchInterval);
+  
+  const darkScreen = document.getElementById("dark-screen");
+  darkScreen.classList.add("instant");
+  darkScreen.classList.add("active");
+  darkScreen.style.opacity = "1";
+  
+  musicPlayer.style.display = "none";
+  document.getElementById("btn-back").style.display = "none";
+  document.getElementById("btn-save-game").style.display = "none";
+  
+  setTimeout(() => {
+    darkScreen.classList.remove("instant");
+    darkScreen.style.opacity = "";
+    
+    progress.scene = "start"; 
+    resetGameUI();
+    showScreen("title");
+    switchMusic(bgm1, "莘逼晨成Book ~ We＆炸炸炸猪", "bgm1");
+  }, 3000);
+}
+
 function showCharacterSprite(src) {
   charSprite.src = src;
   charSprite.classList.add('show');
@@ -962,6 +1037,16 @@ function resetGameUI() {
   clearInterval(typingTimer);
   clearInterval(glitchInterval);
   glitchInterval = null;
+  
+  if (window.glitchFlickerTimer) {
+    clearInterval(window.glitchFlickerTimer);
+    window.glitchFlickerTimer = null;
+  }
+  const existingLayer = document.getElementById("glitch-flicker-layer");
+  if (existingLayer) existingLayer.remove();
+  
+  storyText.style.minHeight = "120px"; 
+
   storyText.innerHTML = "";
   storyChoices.innerHTML = "";
   document.getElementById("dark-screen").classList.remove("active");
@@ -996,9 +1081,58 @@ function showSceneImage(src) {
   sceneImageContainer.style.display = "block";
 }
 
+// 上菜逻辑
+function serveKatsu() {
+  showLeftCharSprite("zzzz.jpg");
+  setTimeout(() => {
+    typeWriter("喵~傻逼~喵~，客官请慢用~", storyText, () => {
+      storyText.innerHTML += `<br><br>你看着眼前热气腾腾的炸猪排，吃了起来……`;
+      
+      const btn = document.createElement("button");
+      btn.className = "story-btn";
+      btn.textContent = "我吃完了";
+      btn.onclick = () => {
+        storyChoices.innerHTML = "";
+        finishEating();
+      };
+      storyChoices.appendChild(btn);
+    });
+  }, 500);
+}
+
+// 吃完后的结算逻辑
+function finishEating() {
+  if (progress.freeMeal) {
+    typeWriter("吃饱喝足，丝莘对你说：“喵~傻逼~喵~吃完了就快走吧，别占着茅坑不拉屎！”", storyText, () => {
+      setTimeout(() => loadScene("door_choice"), 1500);
+    });
+  } else {
+    // 【修改点】价格改为 520
+    typeWriter("喵~傻逼~喵~ 一共 520 元宝。", storyText, () => {
+      setTimeout(() => {
+        typeWriter("我...我好像没带钱……", storyText, () => {
+          document.querySelector(".game-wrap").classList.add("shaking");
+          document.getElementById("red-screen").classList.add("active");
+          playSfx(sfxAlert);
+          setTimeout(() => {
+            document.querySelector(".game-wrap").classList.remove("shaking");
+            document.getElementById("red-screen").classList.remove("active");
+            // 【修改点】丝莘台词更改
+            typeWriter("喵~傻逼~喵~现在的年轻人真是连饭都吃不起了", storyText, () => {
+              progress.owedMoney = true;
+              setTimeout(() => loadScene("door_choice"), 2000);
+            });
+          }, 1500);
+        });
+      }, 1000);
+    });
+  }
+}
+
 function loadScene(sceneName) {
   resetGameUI();
   progress.scene = sceneName;
+  updateMoney();
   
   const pName = progress.playerName || "旅人"; 
 
@@ -1007,6 +1141,14 @@ function loadScene(sceneName) {
       document.getElementById("screen-game").style.backgroundImage = "url('bg1.jpeg')";
       switchMusic(bgm2, "KeraiWalk", "bgm2");
       typeWriter(`哦吼吼，逼然不美吗？你无法认识到它的美~让我给你介绍吧！\n\n末世来临，${pName}，选择你的酒店。`, storyText, () => {
+        renderChoices();
+      });
+      break;
+
+    case "start_at_door":
+      document.getElementById("screen-game").style.backgroundImage = "url('bg.jpg')";
+      switchMusic(bgm2, "KeraiWalk", "bgm2");
+      typeWriter("你站在莘莘之家的门口，回想起刚才的一切。接下来该怎么做？", storyText, () => {
         renderChoices();
       });
       break;
@@ -1041,6 +1183,58 @@ function loadScene(sceneName) {
         
         storyChoices.appendChild(btnIn);
         storyChoices.appendChild(btnOut);
+      });
+      break;
+
+    case "door_choice":
+      document.getElementById("screen-game").style.backgroundImage = "url('bg.jpg')";
+      switchMusic(bgm2, "KeraiWalk", "bgm2");
+      typeWriter("你站在莘莘之家门口，接下来该怎么做？", storyText, () => {
+        const btnIn = document.createElement("button");
+        btnIn.className = "story-btn";
+        btnIn.textContent = "再进去看看";
+        btnIn.onclick = () => {
+          storyChoices.innerHTML = "";
+          if (progress.owedMoney) {
+            loadScene("cat_sixin_beat");
+          } else if (progress.freeMeal) {
+            typeWriter("你推了推门，发现门已经被锁死了，里面传来丝莘的声音：“今天打烊了，快滚！”", storyText, () => {
+              setTimeout(() => loadScene("start_at_door"), 2500);
+            });
+          } else {
+            loadScene("start_at_door");
+          }
+        };
+        
+        const btnOut = document.createElement("button");
+        btnOut.className = "story-btn";
+        btnOut.textContent = "转身离开";
+        btnOut.onclick = () => {
+          storyChoices.innerHTML = "";
+          loadScene("start_at_door");
+        };
+        
+        storyChoices.appendChild(btnIn);
+        storyChoices.appendChild(btnOut);
+      });
+      break;
+
+    case "cat_sixin_beat":
+      document.getElementById("screen-game").style.backgroundImage = "url('bg4.jpg')";
+      showCharacterSprite("sixin2.png");
+      switchMusic(bgm2, "KeraiWalk", "bgm2");
+      typeWriter("你刚推门进去，丝莘就冲了过来：“喵~傻逼~喵~ 你还敢回来？！”", storyText, () => {
+        document.querySelector(".game-wrap").classList.add("shaking");
+        document.getElementById("red-screen").classList.add("active");
+        playSfx(sfxAlert);
+        setTimeout(() => {
+          document.querySelector(".game-wrap").classList.remove("shaking");
+          document.getElementById("red-screen").classList.remove("active");
+          typeWriter("丝莘把你按在地上暴打了一顿，然后扔出了门外。", storyText, () => {
+            progress.owedMoney = false; 
+            setTimeout(() => loadScene("start_at_door"), 2000);
+          });
+        }, 1500);
       });
       break;
 
@@ -1122,7 +1316,32 @@ function loadScene(sceneName) {
       showCharacterSprite("sixin2.png");
       switchMusic(bgm2, "KeraiWalk", "bgm2");
       
-      typeWriter("喵~傻逼~喵~客官想吃点什么喵~", storyText, () => {
+      if (progress.playerName === "丝莘") {
+        typeWriter("喵？！你居然敢叫这个名字？！！找死！", storyText, () => {
+          setTimeout(() => {
+            charSprite.classList.add('sprint');
+            document.getElementById("red-screen").classList.add("active");
+            document.querySelector(".game-wrap").classList.add("shaking");
+            
+            playSfx(sfxAlert);
+
+            typeWriter("丝莘以极快的速度向你冲刺过来！", storyText, () => {
+              setTimeout(() => {
+                document.getElementById("dark-screen").classList.add("active");
+                unlockAchievement("hidden1");
+                setTimeout(() => {
+                  document.getElementById("ending-title").textContent = "💥 女莘力量！！";
+                  document.getElementById("ending-desc").innerHTML = '解锁Hidden Ending1：<span class="gold-text">女莘力量！！</span>';
+                  document.getElementById("ending-modal").classList.add("active");
+                }, 1500);
+              }, 1000);
+            });
+          }, 1000);
+        });
+        break; 
+      }
+
+      typeWriter("喵~傻逼~喵~居然不认识本老板娘？记住了，本喵叫丝莘！\n客官想吃点什么喵~", storyText, () => {
         const btn1 = document.createElement("button");
         btn1.className = "story-btn";
         btn1.textContent = "选项1：卧槽尼玛！这是啥东西？？？快逃吧！";
@@ -1138,14 +1357,11 @@ function loadScene(sceneName) {
         btn2.textContent = "选项2：不管了我好饿啊。";
         btn2.onclick = () => {
           storyChoices.innerHTML = "";
-          typeWriter(`卧槽饿死了有什么吃的？？？\n\n喵~傻逼~喵~${pName}这里只有招牌菜炸炸炸猪了，你来魑魅吧。`, storyText, () => {
-            showLeftCharSprite("zzzz.jpg");
-            
+          
+          typeWriter(`卧槽饿死了有什么吃的？？？\n\n喵~傻逼~喵~${pName}这里只有招牌菜炸炸炸猪了，你来魑魅吧。\n\n（丝莘转身走向了后厨，去准备传说中的招牌菜了……）`, storyText, () => {
             setTimeout(() => {
-              typeWriter("（丝莘转身走向了后厨，去准备传说中的招牌菜了……）", storyText, () => {
-                setTimeout(() => {
-                  storyText.innerHTML += `<br><br>你陷入了漫长的等待……`;
-                }, 1500);
+              typeWriter("你的心中不免的升起一些不安的思绪……\n这老板怎么是只黑猫？？好丑呀！！\n等等，是不是哪里不太对劲？", storyText, () => {
+                renderFirstDoubt();
               });
             }, 1500);
           });
@@ -1178,6 +1394,18 @@ function loadScene(sceneName) {
         storyChoices.appendChild(btn2);
         storyChoices.appendChild(btn3);
       });
+      break;
+
+    case "doubt_1":
+      renderFirstDoubt();
+      break;
+
+    case "doubt_2":
+      renderSecondDoubt();
+      break;
+
+    case "doubt_hearing":
+      renderHearingTest(pName);
       break;
 
     case "dog_encounter":
@@ -1242,7 +1470,46 @@ function loadScene(sceneName) {
         toggle = !toggle;
       }, 100);
       
-      typeWriter("你来到了？？？？。", storyText, () => {});
+      storyText.innerHTML = "";
+      storyText.style.minHeight = "200px"; 
+
+      const glitchTextLayer = document.createElement("div");
+      glitchTextLayer.id = "glitch-flicker-layer";
+      glitchTextLayer.style.cssText = `
+        position: fixed; z-index: 10; pointer-events: none;
+        color: #ff4d4d; font-size: 26px; font-weight: bold; letter-spacing: 5px;
+        text-shadow: 0 0 15px red, 0 0 5px #fff; text-align: center;
+        white-space: pre-wrap; transition: left 0.05s, top 0.05s;
+        font-family: monospace;
+      `;
+      gsGlitch.appendChild(glitchTextLayer);
+      
+      window.glitchFlickerTimer = setInterval(() => {
+        const left = Math.random() * 60 + 20; 
+        const top = Math.random() * 60 + 20;  
+        glitchTextLayer.style.left = left + "vw";
+        glitchTextLayer.style.top = top + "vh";
+        glitchTextLayer.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 10 - 5}deg)`;
+        
+        glitchTextLayer.innerText = getGlitchText("你来到了？？？？。\n接下来该怎么做？");
+      }, 80); 
+
+      storyChoices.innerHTML = "";
+      const choices = ["进店", "进店", "进店"];
+      choices.forEach((text, index) => {
+        const btn = document.createElement("button");
+        btn.className = "story-btn red-text";
+        btn.textContent = `选项${index + 1}：${text}`;
+        btn.onclick = () => {
+          storyChoices.innerHTML = "";
+          if (Math.random() < 0.9) {
+            triggerGlitchFail();
+          } else {
+            loadScene("restaurant_inside");
+          }
+        };
+        storyChoices.appendChild(btn);
+      });
       break;
 
     case "hotel":
@@ -1281,6 +1548,128 @@ function loadScene(sceneName) {
   }
 }
 
+function renderFirstDoubt() {
+  storyChoices.innerHTML = "";
+  const choices = [
+    { text: "选项1：想多了吧！", action: () => serveKatsu() },
+    { text: "选项2：不对，有点奇怪。", action: () => loadScene("doubt_2") },
+    { text: "选项3：要不我先跑吧！", action: () => {
+        typeWriter("（快逃吧）", storyText, () => {
+          setTimeout(() => loadScene("dog_encounter"), 1500);
+        });
+      } 
+    }
+  ];
+
+  choices.forEach(c => {
+    const btn = document.createElement("button");
+    btn.className = "story-btn";
+    btn.textContent = c.text;
+    btn.onclick = () => {
+      storyChoices.innerHTML = "";
+      c.action();
+    };
+    storyChoices.appendChild(btn);
+  });
+}
+
+function renderSecondDoubt() {
+  storyText.innerHTML = "到底是哪里有问题呢？";
+  storyChoices.innerHTML = "";
+  const choices = [
+    { text: "选项1：感觉", action: () => { 
+        typeWriter("卧槽！我没带钱啊！！？？", storyText, () => {
+          document.querySelector(".game-wrap").classList.add("shaking");
+          playSfx(sfxAlert);
+          setTimeout(() => {
+            document.querySelector(".game-wrap").classList.remove("shaking");
+            showCharacterSprite("sixin2.png");
+            charSprite.classList.add('sprint');
+            setTimeout(() => { charSprite.classList.remove('sprint'); }, 600);
+            
+            setTimeout(() => {
+              typeWriter("喵~傻逼~喵~真是个诚实的好孩子，这单我帮你免了，再给你一点钱吧。", storyText, () => {
+                progress.money += 520;
+                progress.freeMeal = true;
+                updateMoney();
+                setTimeout(() => serveKatsu(), 1000);
+              });
+            }, 600);
+          }, 800);
+        });
+    } },
+    { text: "选项2：视觉", action: () => { typeWriter("果然这家店好奇怪，尤其是这个老板太肥了，真是身材差，很胖！眼睛瞎！体重差！身高差！", storyText, () => serveKatsu()); } },
+    { text: "选项3：听觉", action: () => loadScene("doubt_hearing") },
+    { text: "选项4：嗅觉", action: () => {
+        typeWriter("这家店怎么一点食物的味道都没有呢？", storyText, () => {
+          document.querySelector(".game-wrap").classList.add("shaking");
+          playSfx(sfxAlert);
+          setTimeout(() => {
+            document.querySelector(".game-wrap").classList.remove("shaking");
+            typeWriter("喵~傻逼~喵~晚上都没客人你想闻什么喵~傻逼~喵~", storyText, () => serveKatsu());
+          }, 800);
+        });
+      } 
+    },
+    { text: "选项5：味觉", action: () => { typeWriter("呃呃呃果然是我太饿了快上菜！！！", storyText, () => serveKatsu()); } }
+  ];
+
+  choices.forEach(c => {
+    const btn = document.createElement("button");
+    btn.className = "story-btn";
+    btn.textContent = c.text;
+    btn.onclick = () => {
+      storyChoices.innerHTML = "";
+      c.action();
+    };
+    storyChoices.appendChild(btn);
+  });
+}
+
+function renderHearingTest(pName) {
+  storyText.innerHTML = "究竟是哪里有问题呢？仔细回想一下刚才她说过的话……";
+  storyChoices.innerHTML = "";
+  
+  const quotes = [
+    "“喵~傻逼~喵~客官想吃点什么喵~”",
+    "“喵~傻逼~喵~居然不认识本老板娘？记住了，本喵叫丝莘！客官想吃点什么喵~”",
+    "“卧槽饿死了有什么吃的？？？”",
+    `“喵~傻逼~喵~${pName}这里只有招牌菜炸炸炸猪了，你来魑魅吧。”`
+  ];
+
+  quotes.forEach((q, index) => {
+    const btn = document.createElement("button");
+    btn.className = "story-btn";
+    btn.textContent = `选项${index + 1}：${q}`;
+    btn.onclick = () => {
+      storyChoices.innerHTML = "";
+      
+      if (index === 3) {
+        unlockAchievement("ach4"); 
+        document.querySelector(".game-wrap").classList.add("shaking");
+        document.getElementById("red-screen").classList.add("active");
+        playSfx(sfxAlert);
+
+        typeWriter("为什么这个逼莘她会知道我的名字？？？卧槽？？？", storyText, () => {
+          setTimeout(() => {
+            document.querySelector(".game-wrap").classList.remove("shaking");
+            document.getElementById("red-screen").classList.remove("active");
+            
+            showCharacterSprite("sixin2.png");
+            charSprite.classList.add('sprint');
+            setTimeout(() => { charSprite.classList.remove('sprint'); }, 600);
+
+            typeWriter("老娘就是知道怎么滴？炸炸炸猪好了快来看快来选啊！", storyText, () => serveKatsu());
+          }, 1500);
+        });
+      } else {
+        typeWriter("应该是我想多了，她只是随口说说吧。", storyText, () => serveKatsu());
+      }
+    };
+    storyChoices.appendChild(btn);
+  });
+}
+
 function renderChoices() {
   storyChoices.innerHTML = "";
   const choices = [
@@ -1302,6 +1691,7 @@ function renderChoices() {
 }
 
 function chooseStay() {
+  if (progress.playerName === "亖莘") { loadScene("restaurant_glitch"); return; }
   if (Math.random() < 0.75) {
     unlockAchievement("ach2");
     loadScene("bad_end_1");
@@ -1311,6 +1701,7 @@ function chooseStay() {
 }
 
 function chooseRestaurant() {
+  if (progress.playerName === "亖莘") { loadScene("restaurant_glitch"); return; }
   if (Math.random() < 0.9) {
     loadScene("restaurant_normal");
   } else {
@@ -1319,13 +1710,10 @@ function chooseRestaurant() {
 }
 
 function chooseHotel() {
+  if (progress.playerName === "亖莘") { loadScene("restaurant_glitch"); return; }
   loadScene("hotel");
 }
 
-
-/* =========================================================
-   6. 菜单、初始化与其它事件绑定
-   ========================================================= */
 function backToTitle() {
   if (progress.scene === "restaurant_glitch") {
     showToast("你无路可退……");
@@ -1333,7 +1721,7 @@ function backToTitle() {
   }
   resetGameUI();
   showScreen("title");
-  switchMusic(bgm1, "莘逼晨晨Book ~ We＆炸炸炸猪", "bgm1");
+  switchMusic(bgm1, "莘逼晨成Book ~ We＆炸炸炸猪", "bgm1");
 }
 
 $$(".menu-btn").forEach(btn => {
@@ -1348,7 +1736,7 @@ $$(".menu-btn").forEach(btn => {
         return;
       }
       
-      progress = { v: 1, scene: "start", playerName: nameInput, achievements: [], music: unlockedMusic, angeredSixin: false, hitCount: 0 };
+      progress = { v: 1, scene: "start", playerName: nameInput, achievements: [], music: unlockedMusic, angeredSixin: false, hitCount: 0, money: 0, freeMeal: false, owedMoney: false };
       unlockAchievement("ach1");
       showScreen("game");
       loadScene("start");
@@ -1387,19 +1775,17 @@ $("#btn-save-game").addEventListener("click", () => {
 });
 
 $("#btn-confirm-reset").addEventListener("click", () => {
-  // 清空存储
   localStorage.removeItem("xbcb_achievements");
   localStorage.removeItem("xbcb_music");
   
-  // 重置内存
   ACHIEVEMENTS.forEach(ach => ach.unlocked = false);
-  unlockedMusic = ["bgm1"]; // 保留标题曲
+  unlockedMusic = ["bgm1"]; 
   
-  // 直接写入初始数据
   localStorage.setItem("xbcb_music", JSON.stringify(unlockedMusic));
   
-  progress = { v: 1, scene: "start", playerName: "", achievements: [], music: ["bgm1"], angeredSixin: false, hitCount: 0 };
+  progress = { v: 1, scene: "start", playerName: "", achievements: [], music: ["bgm1"], angeredSixin: false, hitCount: 0, money: 0, freeMeal: false, owedMoney: false };
   document.getElementById("player-name").value = "";
+  updateMoney();
   
   renderAchievements();
   renderMusicRoom();
@@ -1416,12 +1802,8 @@ $("#farewell-back").addEventListener("click", () => {
   $("#farewell").classList.remove("show"); backToTitle();
 });
 
-/* =========================================================
-   初始化
-   ========================================================= */
 renderAchievements();
 renderMusicRoom();      
-
 musicTitle.textContent = "莘逼晨成Book ~ We＆炸炸炸猪";
 </script>
 </body>
