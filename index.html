@@ -576,7 +576,6 @@ const ASSETS = {
 
 let totalAssets = ASSETS.images.length + ASSETS.audios.length;
 let loadedAssets = 0;
-let loadErrors = 0;
 
 const progressBar = document.getElementById('progress-bar');
 const progressText = document.getElementById('progress-text');
@@ -593,10 +592,16 @@ function updateProgress() {
     setTimeout(() => {
       loadingScreen.classList.add('hide');
       titleScreen.classList.add('active');
+      
+      // 【修复关键点】等界面显示出来，重新计算一次背景尺寸并移动
+      setTimeout(() => {
+        calculateBg();
+      }, 100);
+
       // 加载完成后，确保标题曲解锁并渲染
       unlockMusic("bgm1");
       renderMusicRoom();
-    }, 500); // 稍微停顿一下，让100%显示完整
+    }, 500);
   }
 }
 
@@ -606,7 +611,7 @@ function preloadAssets() {
     img.onload = () => updateProgress();
     img.onerror = () => {
       console.warn("图片加载失败:", src);
-      updateProgress(); // 即使失败也算作加载完，防止卡死
+      updateProgress(); 
     };
     img.src = src;
   });
@@ -619,7 +624,7 @@ function preloadAssets() {
       updateProgress();
     };
     audio.src = src;
-    audio.load(); // 强制开始加载
+    audio.load(); 
   });
 }
 
