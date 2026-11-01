@@ -22,7 +22,6 @@
     font-family:"Songti SC","STSong","SimSun","Noto Serif SC",serif;
     -webkit-font-smoothing:antialiased;
     background:var(--bg-0);
-    transition: background-color 0.1s;
   }
 
   /* ============ 屏幕通用 ============ */
@@ -36,6 +35,33 @@
   }
   .screen.active{display:flex; animation:fade .5s ease both;}
   @keyframes fade{from{opacity:0;} to{opacity:1;}}
+
+  /* ============ 加载界面 ============ */
+  #loading-screen {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #06070b;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: opacity 0.8s ease;
+  }
+  #loading-screen.hide {
+    opacity: 0; pointer-events: none;
+  }
+  .loading-title {
+    font-size: 20px; letter-spacing: 0.2em; color: var(--gold);
+    margin-bottom: 20px; font-weight: 400;
+  }
+  .progress-container {
+    width: 260px; height: 4px; background: rgba(255,255,255,0.1);
+    border-radius: 2px; overflow: hidden; margin-bottom: 12px;
+  }
+  #progress-bar {
+    width: 0%; height: 100%; background: var(--gold);
+    box-shadow: 0 0 10px var(--gold);
+    transition: width 0.2s ease;
+  }
+  #progress-text {
+    font-size: 12px; color: var(--dim); letter-spacing: 0.1em;
+  }
 
   /* 屏幕震动动画 */
   @keyframes shake {
@@ -377,6 +403,15 @@
 </head>
 <body>
 
+<!-- ==================== 资源加载界面 ==================== -->
+<div id="loading-screen">
+  <div class="loading-title">正在加载莘莘之家...</div>
+  <div class="progress-container">
+    <div id="progress-bar"></div>
+  </div>
+  <div id="progress-text">0%</div>
+</div>
+
 <!-- BGM -->
 <audio id="bgm1" src="bgm1.mp3" loop></audio>
 <audio id="bgm2" src="bgm2.mp3" loop></audio>
@@ -412,7 +447,7 @@
   <span>🏆</span> <span id="toast-text">解锁成就！</span>
 </div>
 
-<main id="screen-title" class="screen active">
+<main id="screen-title" class="screen">
   <div class="bg-container">
     <img src="bg.jpg" id="title-bg" class="bg-image" alt="背景图">
   </div>
@@ -526,13 +561,71 @@
 
 <script>
 /* =========================================================
-   0. 资源预加载
+   0. 资源预加载与进度条逻辑
    ========================================================= */
-const imgPreload = ['bg.jpg', 'bg1.jpeg', 'bg2.png', 'bg3.png', 'bg4.jpg', 'dog.png', 'sixin2.png', 'zzzz.jpg'];
-imgPreload.forEach(src => {
-  const img = new Image();
-  img.src = src;
-});
+const ASSETS = {
+  images: [
+    'bg.jpg', 'bg1.jpeg', 'bg2.png', 'bg3.png', 'bg4.jpg', 
+    'dog.png', 'sixin2.png', 'zzzz.jpg'
+  ],
+  audios: [
+    'bgm1.mp3', 'bgm2.mp3', 'bgm3.ogg', 
+    'alert.wav', 'achievement.wav'
+  ]
+};
+
+let totalAssets = ASSETS.images.length + ASSETS.audios.length;
+let loadedAssets = 0;
+let loadErrors = 0;
+
+const progressBar = document.getElementById('progress-bar');
+const progressText = document.getElementById('progress-text');
+const loadingScreen = document.getElementById('loading-screen');
+const titleScreen = document.getElementById('screen-title');
+
+function updateProgress() {
+  loadedAssets++;
+  const percent = Math.min(100, Math.floor((loadedAssets / totalAssets) * 100));
+  progressBar.style.width = percent + '%';
+  progressText.textContent = percent + '%';
+  
+  if (loadedAssets >= totalAssets) {
+    setTimeout(() => {
+      loadingScreen.classList.add('hide');
+      titleScreen.classList.add('active');
+      // 加载完成后，确保标题曲解锁并渲染
+      unlockMusic("bgm1");
+      renderMusicRoom();
+    }, 500); // 稍微停顿一下，让100%显示完整
+  }
+}
+
+function preloadAssets() {
+  ASSETS.images.forEach(src => {
+    const img = new Image();
+    img.onload = () => updateProgress();
+    img.onerror = () => {
+      console.warn("图片加载失败:", src);
+      updateProgress(); // 即使失败也算作加载完，防止卡死
+    };
+    img.src = src;
+  });
+
+  ASSETS.audios.forEach(src => {
+    const audio = new Audio();
+    audio.oncanplaythrough = () => updateProgress();
+    audio.onerror = () => {
+      console.warn("音频加载失败:", src);
+      updateProgress();
+    };
+    audio.src = src;
+    audio.load(); // 强制开始加载
+  });
+}
+
+// 开始加载
+preloadAssets();
+
 
 /* =========================================================
    1. 音乐/音效播放与音量控制逻辑
@@ -1107,7 +1200,6 @@ function finishEating() {
       setTimeout(() => loadScene("door_choice"), 1500);
     });
   } else {
-    // 【修改点】价格改为 520
     typeWriter("喵~傻逼~喵~ 一共 520 元宝。", storyText, () => {
       setTimeout(() => {
         typeWriter("我...我好像没带钱……", storyText, () => {
@@ -1117,10 +1209,9 @@ function finishEating() {
           setTimeout(() => {
             document.querySelector(".game-wrap").classList.remove("shaking");
             document.getElementById("red-screen").classList.remove("active");
-            // 【修改点】丝莘台词更改
-            typeWriter("喵~傻逼~喵~现在的年轻人真是连饭都吃不起了", storyText, () => {
+            typeWriter("喵~傻逼~喵~现在的年轻人真是连饭都吃不起了\n\n不欢迎下次光临喵~", storyText, () => {
               progress.owedMoney = true;
-              setTimeout(() => loadScene("door_choice"), 2000);
+              setTimeout(() => loadScene("door_choice"), 2500);
             });
           }, 1500);
         });
@@ -1149,7 +1240,20 @@ function loadScene(sceneName) {
       document.getElementById("screen-game").style.backgroundImage = "url('bg.jpg')";
       switchMusic(bgm2, "KeraiWalk", "bgm2");
       typeWriter("你站在莘莘之家的门口，回想起刚才的一切。接下来该怎么做？", storyText, () => {
-        renderChoices();
+        storyChoices.innerHTML = "";
+        
+        const btn1 = document.createElement("button");
+        btn1.className = "story-btn";
+        btn1.textContent = "选项1：呆在原地不动";
+        btn1.onclick = () => { storyChoices.innerHTML = ""; chooseStay(); };
+        
+        const btn2 = document.createElement("button");
+        btn2.className = "story-btn";
+        btn2.textContent = "选项2：前往酒店安置自我";
+        btn2.onclick = () => { storyChoices.innerHTML = ""; chooseHotel(); };
+        
+        storyChoices.appendChild(btn1);
+        storyChoices.appendChild(btn2);
       });
       break;
 
